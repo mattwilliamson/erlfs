@@ -1,0 +1,5 @@
+{application, erlfs, [
+  {description, "Erlang distributed file storage."},
+  {vsn, ".01"},
+  {modules, []}
+  ]}
