@@ -1,0 +1,18 @@
+
+--This line, and those below, will be ignored--
+
+A    priv
+A    include
+AM   include/erlfs.hrl
+AM   include/erlfs.hrl~
+A    src
+AM   src/erlfs_application.erl
+AM   src/erlfs_supervisor.beam
+AM   src/erlfs_server.erl~
+AM   src/erlfs_application.beam
+AM   src/erlfs_server.erl
+AM   src/erlfs_server.beam
+AM   src/erlfs_supervisor.erl
+AM   src/erlfs_application.erl~
+A    svn-commit.tmp~
+A    ebin
