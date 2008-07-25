@@ -34,7 +34,8 @@ store_file_chunk(FileChunk#file_chunk{
     FilePathHash = erlang:md5(Path "/" FileName),
     FinalPath = hash_to_path(DirPathHash) ++ hash_to_path(FilePathHash),
     ok = file_lib:ensure_dir(FinalPath), % make sure entire path exists
-    File = file:open(?DATA_DIR, FinalPath ++ ChunkNumber, [write, raw]),
+    File = file:open(?DATA_DIR ++ "/" ++ FinalPath ++ ChunkNumber, 
+		     [write, raw]),
     file:write(File, Data).
 %% TODO: Add error handling
 
