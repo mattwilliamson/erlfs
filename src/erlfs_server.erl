@@ -43,12 +43,12 @@ start_link() ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init([]) ->
-    % Start Mnesia
-    % announce to known nodes that this node is starting (synchronous)
+						% Start Mnesia
+						% announce to known nodes that this node is starting (synchronous)
     {ok, #state{}}.
 
 %%--------------------------------------------------------------------
-%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
+%% Function: handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
 %%                                      {noreply, State} |
 %%                                      {noreply, State, Timeout} |

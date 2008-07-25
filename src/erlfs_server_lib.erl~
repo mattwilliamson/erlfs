@@ -1,0 +1,9 @@
+%%% File    : erlfs_server_lib.erl
+%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% Description : This is a library module for erlfs_server to
+%%% perform common tasks.
+%%% Created : 24 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+
+-module(erlfs_server_lib).
+
+
