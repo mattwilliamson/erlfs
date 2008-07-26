@@ -1,6 +1,6 @@
-%% script generated at {2008,7,24} {15,3,14}
+%% script generated at {2008,7,25} {17,50,33}
 {script,
-    {"erlfs",".01"},
+    {"erlfs","0.01"},
     [{preLoaded,[erlang,erl_prim_loader,prim_file,prim_inet,init,otp_ring0]},
      {progress,preloaded},
      {path,["$ROOT/lib/kernel-2.11.5/ebin","$ROOT/lib/stdlib-1.14.5/ebin"]},

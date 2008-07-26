@@ -11,7 +11,7 @@
 -behaviour(supervisor).
 
 %% API
--export([start_link/0]).
+-export([start_link/1]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -22,11 +22,11 @@
 %% API functions
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
+%% Function: start_link(StartArgs) -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the supervisor
 %%--------------------------------------------------------------------
-start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+start_link(StartArgs) ->
+    supervisor:start_link({local, ?SERVER}, ?MODULE, StartArgs).
 
 %%====================================================================
 %% Supervisor callbacks
@@ -40,10 +40,10 @@ start_link() ->
 %% to find out about restart strategy, maximum restart frequency and child 
 %% specifications.
 %%--------------------------------------------------------------------
-init([]) ->
-    ErlFSServer = {'ErlFSServer',{'erlfs_server',start_link,[]},
-	      permanent,2000,worker,['erlfs_server']},
-    {ok,{{one_for_one,0,1}, [ErlFSServer]}}.
+init(StartArgs) ->
+    ErlFSServer = {erlfs_server, {erlfs_server, start_link, StartArgs},
+	      permanent, 2000, worker, [erlfs_server]},
+    {ok, {{one_for_one, 5, 1}, [ErlFSServer]}}.
 
 %%====================================================================
 %% Internal functions

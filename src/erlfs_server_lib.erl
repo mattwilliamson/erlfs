@@ -8,10 +8,10 @@
 %%%-------------------------------------------------------------------
 -module(erlfs_server_lib).
 
+-include("../include/erlfs.hrl").
+
 %% API
 -export([store_file_chunk/1]).
-
--include("../include/erlfs.hrl").
 
 %%====================================================================
 %% API
@@ -27,11 +27,11 @@
 %% The chunk will be stored under the filename n, where n is the chunk
 %% number.
 %%--------------------------------------------------------------------
-store_file_chunk(FileChunk#file_chunk{
-		   #file_meta{DirPath=path, FileName=name},
-		   ChunkNumber=chunk_number, Data=data}) ->
-    DirPathHash = erlang:md5(Path),
-    FilePathHash = erlang:md5(Path "/" FileName),
+store_file_chunk(#file_chunk{file_meta=#file_meta{path=DirPath, 
+						  name=FileName},
+			     chunk_number=ChunkNumber, data=Data}) ->
+    DirPathHash = erlang:md5(DirPath),
+    FilePathHash = erlang:md5(DirPath ++ "/" ++ FileName),
     FinalPath = hash_to_path(DirPathHash) ++ hash_to_path(FilePathHash),
     ok = file_lib:ensure_dir(FinalPath), % make sure entire path exists
     File = file:open(?DATA_DIR ++ "/" ++ FinalPath ++ ChunkNumber, 
@@ -47,7 +47,7 @@ store_file_chunk(FileChunk#file_chunk{
 
 %% Converts hash e.g. abcdef... to directory path e.g. /ab/cd/ef..
 hash_to_path(HashBinary) when is_binary(HashBinary) ->
-    hash_to_path(binary_to_list(HashBinary));
+    hash_to_path(binary_to_list(HashBinary), []);
 hash_to_path(HashString) when is_list(HashString) ->
     hash_to_path(HashString).
 hash_to_path([A,B|Rest], NewList) ->

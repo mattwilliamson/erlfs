@@ -24,14 +24,14 @@
 %% Function: get_file
 %% Description: Retrieve a file stored on an ErlFS cluster.
 %%--------------------------------------------------------------------
-get_file(#file_meta, Nodes) ->
-    #file.
+get_file(#file_meta{}, _Nodes) ->
+    #file{}.
 
 %%--------------------------------------------------------------------
 %% Function: put_file
 %% Description: Store a file on an ErlFS cluster.
 %%--------------------------------------------------------------------
-put_file(#file, Nodes) ->
+put_file(#file{}, _Nodes) ->
     ok.
 
 %%====================================================================

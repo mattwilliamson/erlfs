@@ -1,5 +1,5 @@
 {release,
- {"erlfs", ".01"},
+ {"erlfs", "0.01"},
  {erts, "5.5.5"},
  [{kernel, "2.11.5"},
   {stdlib, "1.14.5"},

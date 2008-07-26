@@ -8,6 +8,8 @@
 %%%-------------------------------------------------------------------
 -module(erlfs_server).
 
+-define(SERVER, ?MODULE).
+
 -include("../include/erlfs.hrl").
 
 -behaviour(gen_server).
@@ -29,6 +31,7 @@
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start_link() ->
+    io:format("Starting ~p...~n", [?MODULE]),
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 %%====================================================================
@@ -42,9 +45,7 @@ start_link() ->
 %%                         {stop, Reason}
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
-init([]) ->
-						% Start Mnesia
-						% announce to known nodes that this node is starting (synchronous)
+init(_StartArgs) ->
     {ok, #state{}}.
 
 %%--------------------------------------------------------------------
@@ -59,6 +60,10 @@ init([]) ->
 
 handle_call(shutdown, _From, State) ->
     {stop, normal, State};
+
+handle_call({echo, Msg}, _From, State) ->
+    io:format("Received echo: ~p~n", [Msg]),
+    {reply, ok, State};
 
 handle_call(_Request, _From, State) ->
     Reply = ok,

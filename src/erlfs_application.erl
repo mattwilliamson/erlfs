@@ -27,10 +27,11 @@
 %% top supervisor of the tree.
 %%--------------------------------------------------------------------
 start(_Type, StartArgs) ->
-    case 'erl_supervisor':start_link(StartArgs) of
+    case erlfs_supervisor:start_link(StartArgs) of
 	{ok, Pid} -> 
 	    {ok, Pid};
 	Error ->
+	    io:format("**ERROR** Could not start erlfs_supervisor.~n"),
 	    Error
     end.
 
