@@ -1,0 +1,7 @@
+[
+erlfs_application, 
+erlfs_supervisor,
+erlfs_server,
+erlfs_server_lib,
+erlfs_client_lib
+].

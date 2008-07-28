@@ -1,0 +1,12 @@
+
+--This line, and those below, will be ignored--
+
+AM   erlfs_supervisor.beam
+A    Emakefile~
+A    Emakefile
+A    svn-commit.tmp~
+AM   erlfs_server_lib.beam
+AM   #erlfs.app#
+AM   erlfs_application.beam
+AM   erlfs_client_lib.beam
+AM   erlfs_server.beam
