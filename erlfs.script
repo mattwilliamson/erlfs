@@ -1,4 +1,4 @@
-%% script generated at {2008,7,25} {17,50,33}
+%% script generated at {2008,7,26} {10,54,11}
 {script,
     {"erlfs","0.01"},
     [{preLoaded,[erlang,erl_prim_loader,prim_file,prim_inet,init,otp_ring0]},

@@ -7,7 +7,7 @@
 -define('DATA_DIR', "/home/mwilliamson/erlfs/data").
 
 %% Mnesia Records
--record(file_meta, {path, name, size, accessed, modified}).
+-record(file_meta, {full_path, path, name, size, accessed, modified}).
 -record(file, {file_meta=#file_meta{}, data}).
 -record(file_chunk, {file_meta=#file_meta{}, chunk_number, data}).
 -record(directory, {path, subfolders=[]}).
