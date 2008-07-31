@@ -1,8 +1,7 @@
-{application, erlfs_tracker, [{mod, {erlfs_tracker_app, []}},
+{application, erlfs_tracker_app, [{mod, erlfs_tracker_app, []}},
   	      	      {description, "Erlang distributed file storage system tracker."},
   		      {vsn, "1"},
-		      {registered, erlfs_server},
+		      {registered, [erlfs_tracker]},
 		      {applications, [kernel,
 		     		      stdlib,
-		     		      mnesia]},
-		      {registered, [erlfs_server]}]}.
+		     		      mnesia]}]}.

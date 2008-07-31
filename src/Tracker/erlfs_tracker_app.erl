@@ -31,6 +31,7 @@ start(_Type, StartArgs) ->
 	{ok, Pid} -> 
 	    {ok, Pid};
 	Error ->
+	    io:format("Error starting erlfs_tracker_sup"),
 	    Error
     end.
 
