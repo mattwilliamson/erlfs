@@ -27,16 +27,22 @@
 %% The chunk will be stored under the filename n, where n is the chunk
 %% number.
 %%--------------------------------------------------------------------
-store_file_chunk(#file_chunk{file_meta=#file_meta{path=DirPath, 
-						  name=FileName},
-			     number=ChunkNumber, 
-			     size=Size,
-			     data=Data}) ->
-    DirPathHash = crypto:sha(DirPath),
-    FilePathHash = crypto:sha(DirPath ++ "/" ++ FileName),
+store_file_chunk(#chunk{chunk_meta=#chunk_meta{
+			  file_meta=#file_meta{
+			    full_path=FullPath, 
+			    path=Path, 
+			    name=_Name, 
+			    size=Size, 
+			    created={_CreatedDate, _CreatedTime}}, 
+			  number=Number, 
+			  size=Size, 
+			  nodes=_Nodes}, 
+			data=Data}) ->
+    DirPathHash = crypto:sha(Path),
+    FilePathHash = crypto:sha(FullPath),
     FinalPath = hash_to_path(DirPathHash) ++ hash_to_path(FilePathHash),
     ok = file_lib:ensure_dir(FinalPath), % make sure entire path exists
-    File = file:open(?DATA_DIR ++ "/" ++ FinalPath ++ ChunkNumber, 
+    File = file:open(?DATA_DIR ++ "/" ++ FinalPath ++ "." ++ Number, 
 		     [write, raw]),
     Status = file:write(File, Data),
     file:close(File),

@@ -11,13 +11,14 @@
 -behaviour(gen_fsm).
 
 %% API
--export([start_link/0]).
+-export([start_link/1]).
 
 %% gen_fsm callbacks
--export([init/1, state_name/2, state_name/3, handle_event/3,
+-export([init/1, handle_event/3,
 	 handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
 
--record(state, {}).
+%% States
+-export([storing_chunk/2, notifying_tracker/2, replicating/2, done/2]).
 
 %%====================================================================
 %% API
@@ -65,16 +66,13 @@ storing_chunk(_Event, FileChunk) ->
 
 notifying_tracker(_Event, FileChunk) ->
     %% Tell tracker that we have stored the chunk
-    Trackers = whereis_registered(erlfs_tracker_svr),
+    Trackers = erlfs:whereis_registered(erlfs_tracker_svr),
     notify_tracker(Trackers, FileChunk),
     {next_state, replicating, FileChunk}.
 
 replicating(_Event, FileChunk) ->
-    % TODO: If the replication minimum copies isn't met
-    % get list of nodes running store and then get list of nodes
-    % which already have this chunk and send chunk to one that doesn't
-    % Wait for node to send replication message back and pick another
-    % node if it times out.
+    % TODO: check the number of replicas and if below the min. call 
+    % store_chunk on another node if there are at least as many as min
     {next_state, done, nostate}.
 
 done(_Event, _State) ->
@@ -95,9 +93,9 @@ done(_Event, _State) ->
 %% gen_fsm:sync_send_event/2,3, the instance of this function with the same
 %% name as the current state name StateName is called to handle the event.
 %%--------------------------------------------------------------------
-state_name(_Event, _From, State) ->
-    Reply = ok,
-    {reply, Reply, state_name, State}.
+%state_name(_Event, _From, State) ->
+%    Reply = ok,
+%    {reply, Reply, state_name, State}.
 
 %%--------------------------------------------------------------------
 %% Function: 

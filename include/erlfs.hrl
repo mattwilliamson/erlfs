@@ -8,7 +8,11 @@
 -define('RPC_TIMEOUT', 2000).
 
 %% Mnesia Records
--record(file_meta, {full_path, path, name, size, accessed, modified}).
+-record(file_meta, {full_path="", path="", name="", size=0, 
+		    created={{0, 1, 1}, {0, 0, 0}}}).
 -record(file, {file_meta=#file_meta{}, data}).
--record(file_chunk, {file_meta=#file_meta{}, number, size, data}).
+
+-record(chunk_meta, {file_meta=#file_meta{}, number=0, size=0, nodes=[]}).
+-record(chunk, {chunk_meta=#chunk_meta{}, data}).
+
 -record(directory, {path, subdirectories=[]}).
