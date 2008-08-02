@@ -24,8 +24,8 @@
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the supervisor
 %%--------------------------------------------------------------------
-start_link(_StartArgs) ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+start_link(StartArgs) ->
+    supervisor:start_link({local, ?SERVER}, ?MODULE, StartArgs).
 
 %%====================================================================
 %% Supervisor callbacks
@@ -39,8 +39,8 @@ start_link(_StartArgs) ->
 %% to find out about restart strategy, maximum restart frequency and child 
 %% specifications.
 %%--------------------------------------------------------------------
-init([]) ->
-    ErlFSClient = {erlfs_client,{erlfs_client_svr, start_link, []},
+init(StartArgs) ->
+    ErlFSClient = {erlfs_client_svr,{erlfs_client_svr, start_link, StartArgs},
 	      permanent, 2000, worker, [erlfs_client_svr]},
     {ok,{{one_for_one, 0, 1}, [ErlFSClient]}}.
 

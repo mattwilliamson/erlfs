@@ -1,17 +1,17 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_sup.erl
+%%% File    : erlfs_store_worker_sup.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : This is the top supervisor for the ErlFS storage
-%%% application.
+%%% Description : This is a simple_one_for_one supervisor where worker
+%%% processes are spawned to save and replicate file chunks.
 %%%
-%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% Created :  1 Aug 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs_store_sup).
+-module(erlfs_store_worker_sup).
 
 -behaviour(supervisor).
 
 %% API
--export([start_link/1]).
+-export([start_link/0]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -25,8 +25,8 @@
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the supervisor
 %%--------------------------------------------------------------------
-start_link(StartArgs) ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, StartArgs).
+start_link() ->
+    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 %%====================================================================
 %% Supervisor callbacks
@@ -41,12 +41,9 @@ start_link(StartArgs) ->
 %% specifications.
 %%--------------------------------------------------------------------
 init([]) ->
-    ErlFSStore = {erlfs_store_svr, {erlfs_store_svr, start_link, []},
-	      permanent, 2000, worker, [erlfs_store_svr]},
-    ErlFSWorkers = {erlfs_store_worker_sup, {erlfs_store_worker_sup, 
-					     start_link, []},
-	      permanent, 2000, supervisor, [erlfs_store_worker_sup]},
-    {ok,{{one_for_all, 0, 1}, [ErlFSStore, ErlFSWorkers]}}.
+    {ok, {{simple_one_for_one, 0, 1},
+          [{erlfs_worker_svr, {erlfs_worker_svr, start_link, []},
+            temporary, brutal_kill, worker, [erlfs_worker_svr]}]}}.
 
 %%====================================================================
 %% Internal functions

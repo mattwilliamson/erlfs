@@ -1,14 +1,16 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_svr.erl
+%%% File    : erlfs_store_worker_svr.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : ErlFS storage server. This does the actual file
-%%% chunk storage.
+%%% Description : This gen_server handles storage and replication of 
+%%% file chunks.
 %%%
-%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% Created :  1 Aug 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs_store_svr).
+-module(erlfs_store_worker_svr).
 
 -behaviour(gen_server).
+
+-include("erlfs.hrl").
 
 %% API
 -export([start_link/0]).
@@ -19,8 +21,6 @@
 
 -record(state, {}).
 
--define(SERVER, ?MODULE).
-
 %%====================================================================
 %% API
 %%====================================================================
@@ -28,8 +28,8 @@
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the server
 %%--------------------------------------------------------------------
-start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+start_link(FileChunk) ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, FileChunk, []).
 
 %%====================================================================
 %% gen_server callbacks
@@ -42,7 +42,11 @@ start_link() ->
 %%                         {stop, Reason}
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
-init([]) ->
+init(#file_chunk{file_meta=#file_meta{path=DirPath, 
+				      name=FileName},
+		 number=ChunkNumber, 
+		 size=Size,
+		 data=Data}) ->
     {ok, #state{}}.
 
 %%--------------------------------------------------------------------
@@ -54,12 +58,6 @@ init([]) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
-handle_call({stored_chunk, Ref, FileChunk}, From, State) ->
-    Node = node(From),
-    % If success
-    Reply = {ok, Ref},
-    {reply, Reply, State};
-
 handle_call(_Request, _From, State) ->
     Reply = ok,
     {reply, Reply, State}.
