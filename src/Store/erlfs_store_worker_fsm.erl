@@ -60,19 +60,22 @@ init(FileChunk) ->
 %% called if a timeout occurs. 
 %%--------------------------------------------------------------------
 storing_chunk(_Event, FileChunk) ->
-    erlfs_store_lib:store_chunk(),
-    % case ok check...
-    {next_state, notifying_tracker, FileChunk}.
+    case erlfs_store_lib:store_chunk() of
+	ok ->
+	    {next_state, notifying_tracker, FileChunk};
+	{error, Reason} ->
+	    {stop, {file, Reason}, FileChunk}
+    end.
 
 notifying_tracker(_Event, FileChunk) ->
-    %% Tell tracker that we have stored the chunk
+    %% Tell a tracker that we have stored the chunk
     Trackers = erlfs:whereis_registered(erlfs_tracker_svr),
     notify_tracker(Trackers, FileChunk),
     {next_state, replicating, FileChunk}.
 
 replicating(_Event, FileChunk) ->
-    % TODO: check the number of replicas and if below the min. call 
-    % store_chunk on another node if there are at least as many as min
+    % TODO: just send a request to the replication manager, instead
+    % of another store node
     {next_state, done, nostate}.
 
 done(_Event, _State) ->
@@ -165,11 +168,16 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %%% Internal functions
 %%--------------------------------------------------------------------
 notify_tracker([Node|Trackers], FileChunk) ->
+    %% Notify the first available tracker that this node has stored a
+    %% chunk
+    %% TODO ! Change this so it puls out the metadata only
     Ref = make_ref(),
     Message = {stored_chunk, Ref, FileChunk},
-    gen_server:cast({erlfs_tracker_svr, Node}, Message),
+    gen_server:call({erlfs_tracker_svr, Node}, Message),
     receive {ok, Ref} ->
 	    ok
     after 5000 ->
 	    notify_tracker(Trackers, FileChunk)
-    end.
+    end;
+notify_tracker([], _FileChunk) ->
+    

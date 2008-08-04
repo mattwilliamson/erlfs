@@ -1,5 +1,5 @@
 all:
-	erl -noshell -eval 'make:all()' -pa ebin -s erlang halt
+	erlc -I include -o ebin -v src/*/*.erl
 	
 clean:
 	rm ebin/*.beam

@@ -58,6 +58,12 @@ init(_StartArgs) ->
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
 
+handle_call({stored_chunk, Ref, FileChunk}, From, State) ->
+    Node = node(From),
+    % If success
+    Reply = {ok, Ref},
+    {reply, Reply, State};
+
 handle_call(shutdown, _From, State) ->
     {stop, normal, State};
 

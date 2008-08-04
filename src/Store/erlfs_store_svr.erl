@@ -54,11 +54,6 @@ init([]) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
-handle_call({stored_chunk, Ref, FileChunk}, From, State) ->
-    Node = node(From),
-    % If success
-    Reply = {ok, Ref},
-    {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
     Reply = ok,
