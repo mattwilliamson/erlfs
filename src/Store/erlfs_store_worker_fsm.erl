@@ -8,6 +8,8 @@
 %%%-------------------------------------------------------------------
 -module(erlfs_store_worker_fsm).
 
+-include("erlfs.hrl").
+
 -behaviour(gen_fsm).
 
 %% API
@@ -67,19 +69,23 @@ storing_chunk(_Event, FileChunk) ->
 	    {stop, {file, Reason}, FileChunk}
     end.
 
-notifying_tracker(_Event, FileChunk) ->
+notifying_tracker(_Event, FileChunk=#chunk{chunk_meta=ChunkMeta}) ->
     %% Tell a tracker that we have stored the chunk
     Trackers = erlfs:whereis_registered(erlfs_tracker_svr),
-    notify_tracker(Trackers, FileChunk),
-    {next_state, replicating, FileChunk}.
+    case notify_tracker(Trackers, ChunkMeta) of
+	ok -> {next_state, replicating, FileChunk};
+	%% Try to alert a tracker until successful
+	{error, notrackers} ->
+	    {next_state, notifying_tracker, FileChunk}
+    end.
 
 replicating(_Event, FileChunk) ->
-    % TODO: just send a request to the replication manager, instead
-    % of another store node
+    %% TODO: just send a request to the replication manager, instead
+    %% of another store node
     {next_state, done, nostate}.
 
-done(_Event, _State) ->
-    {stop, done, nostate}.
+done(_Event, State) ->
+    {stop, done, State}.
 
 %%--------------------------------------------------------------------
 %% Function:
@@ -96,9 +102,9 @@ done(_Event, _State) ->
 %% gen_fsm:sync_send_event/2,3, the instance of this function with the same
 %% name as the current state name StateName is called to handle the event.
 %%--------------------------------------------------------------------
-%state_name(_Event, _From, State) ->
-%    Reply = ok,
-%    {reply, Reply, state_name, State}.
+						%state_name(_Event, _From, State) ->
+						%    Reply = ok,
+						%    {reply, Reply, state_name, State}.
 
 %%--------------------------------------------------------------------
 %% Function: 
@@ -167,17 +173,16 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %%--------------------------------------------------------------------
 %%% Internal functions
 %%--------------------------------------------------------------------
-notify_tracker([Node|Trackers], FileChunk) ->
-    %% Notify the first available tracker that this node has stored a
-    %% chunk
-    %% TODO ! Change this so it puls out the metadata only
+notify_tracker([Node|Trackers], ChunkMeta) ->
+    %% Notify a tracker that this node has stored a chunk
+    %% Try until we get a good tracker or we run out
     Ref = make_ref(),
-    Message = {stored_chunk, Ref, FileChunk},
-    gen_server:call({erlfs_tracker_svr, Node}, Message),
-    receive {ok, Ref} ->
-	    ok
-    after 5000 ->
-	    notify_tracker(Trackers, FileChunk)
+    Message = {stored_chunk, ChunkMeta, node()},
+    case gen_server:call({erlfs_tracker_svr, Node}, Message) of
+	{ack, stored_chunk} ->
+	    ok;
+	_ ->
+	    notify_tracker(Trackers, ChunkMeta)
     end;
 notify_tracker([], _FileChunk) ->
-    
+    {error, notrackers}.

@@ -58,10 +58,13 @@ init(_StartArgs) ->
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
 
-handle_call({stored_chunk, Ref, FileChunk}, From, State) ->
-    Node = node(From),
-    % If success
-    Reply = {ok, Ref},
+handle_call({stored_chunk, FileChunk=#chunk{}, Node}, _From, State) ->
+						% If success
+    Success = stored_chunk(FileChunk, Node),
+    case Success of
+	ok -> Reply = {ack, stored_chunk};
+	_ -> {error, Success}
+    end,
     {reply, Reply, State};
 
 handle_call(shutdown, _From, State) ->
@@ -118,3 +121,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 %%% Internal functions
 %%--------------------------------------------------------------------
+
+%% A store node has told us it saved a chunk
+stored_chunk(FileChunk, Node) ->
+    %% TODO: Implement
+    error.
