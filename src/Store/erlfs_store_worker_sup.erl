@@ -40,10 +40,12 @@ start_link() ->
 %% to find out about restart strategy, maximum restart frequency and child 
 %% specifications.
 %%--------------------------------------------------------------------
-init([]) ->
+init(Chunk) ->
     {ok, {{simple_one_for_one, 0, 1},
-          [{erlfs_worker_svr, {erlfs_worker_svr, start_link, []},
-            temporary, brutal_kill, worker, [erlfs_worker_svr]}]}}.
+          [{erlfs_store_worker_fsm, 
+	    {erlfs_store_worker_fsm, start_link, Chunk},
+            temporary, brutal_kill, worker, 
+	    [erlfs_store_worker_fsm]}]}}.
 
 %%====================================================================
 %% Internal functions

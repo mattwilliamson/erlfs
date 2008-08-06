@@ -41,7 +41,7 @@ start_link(StartArgs) ->
 %% specifications.
 %%--------------------------------------------------------------------
 init([]) ->
-    ErlFSStore = {erlfs_store_svr, {erlfs_store_svr, start_link, []},
+    ErlFSStore = {erlfs_store, {erlfs_store_svr, start_link, []},
 	      permanent, 2000, worker, [erlfs_store_svr]},
     ErlFSWorkers = {erlfs_store_worker_sup, {erlfs_store_worker_sup, 
 					     start_link, []},

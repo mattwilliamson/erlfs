@@ -38,7 +38,7 @@
 %% 		  Nodes),
 %%     whereis_registered_collect(Nodes, []).
 
-whereis_registered(PName) ->
+whereis_gen_server(PName) ->
     Nodes = nodes(),
     Request = test,
     {Replies, _BadNodes} = gen_server:multi_call(Nodes, PName, Request),

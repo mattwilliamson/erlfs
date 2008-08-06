@@ -8,6 +8,8 @@
 %%%-------------------------------------------------------------------
 -module(erlfs_store_svr).
 
+-include("erlfs.hrl").
+
 -behaviour(gen_server).
 
 %% API
@@ -54,6 +56,12 @@ init([]) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
+
+handle_call({store_chunk, Chunk}, From, State) ->
+    Reply = storing_chunk,
+    gen_server:reply(From, Reply),
+    supervisor:start_child(erlfs_store_worker_sup, Chunk),
+    {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
     Reply = ok,

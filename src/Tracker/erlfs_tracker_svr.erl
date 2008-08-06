@@ -61,8 +61,8 @@ init(_StartArgs) ->
 handle_call({stored_chunk, FileChunk=#chunk{}, Node}, _From, State) ->
 						% If success
     Success = stored_chunk(FileChunk, Node),
-    case Success of
-	ok -> Reply = {ack, stored_chunk};
+    Reply = case Success of
+	ok -> {ack, stored_chunk};
 	_ -> {error, Success}
     end,
     {reply, Reply, State};

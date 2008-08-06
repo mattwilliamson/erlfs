@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(erlfs_store_lib).
 
--include("../include/erlfs.hrl").
+-include("erlfs.hrl").
 
 %% API
 -export([store_file_chunk/1]).

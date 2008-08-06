@@ -5,7 +5,7 @@
 %%%
 %%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs_client).
+-module(erlfs_client_app).
 
 -behaviour(application).
 

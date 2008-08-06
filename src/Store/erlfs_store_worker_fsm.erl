@@ -66,23 +66,18 @@ storing_chunk(_Event, FileChunk) ->
 	ok ->
 	    {next_state, notifying_tracker, FileChunk};
 	{error, Reason} ->
-	    {stop, {file, Reason}, FileChunk}
+	    {stop, {file, Reason}, FileChunk#chunk.chunk_meta}
     end.
 
-notifying_tracker(_Event, FileChunk=#chunk{chunk_meta=ChunkMeta}) ->
+notifying_tracker(_Event, ChunkMeta) ->
     %% Tell a tracker that we have stored the chunk
-    Trackers = erlfs:whereis_registered(erlfs_tracker_svr),
+    Trackers = erlfs:whereis_gen_server(erlfs_tracker_svr),
     case notify_tracker(Trackers, ChunkMeta) of
-	ok -> {next_state, replicating, FileChunk};
+	ok -> {next_state, done, nostate};
 	%% Try to alert a tracker until successful
 	{error, notrackers} ->
-	    {next_state, notifying_tracker, FileChunk}
+	    {next_state, notifying_tracker, ChunkMeta}
     end.
-
-replicating(_Event, FileChunk) ->
-    %% TODO: just send a request to the replication manager, instead
-    %% of another store node
-    {next_state, done, nostate}.
 
 done(_Event, State) ->
     {stop, done, State}.
