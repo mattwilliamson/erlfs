@@ -2,4 +2,4 @@
 	      {description, "Erlang distributed file storage system storage node application."},
 	      {vsn, ".1"},
 	      {registered, [erlfs_store_svr]},
-	      {applications, [kernel, stdlib]}]}.
+	      {applications, [kernel, stdlib, crypto]}]}.

@@ -58,17 +58,14 @@ init(_StartArgs) ->
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
 
-handle_call({stored_chunk, FileChunk=#chunk{}, Node}, _From, State) ->
-						% If success
-    Success = stored_chunk(FileChunk, Node),
+handle_call({stored_chunk, ChunkMeta, Node}, _From, State) ->
+    gen_server:reply(From),
+    Success = stored_chunk(ChunkMeta, Node),
     Reply = case Success of
-	ok -> {ack, stored_chunk};
+	ok -> {ok, stored_chunk};
 	_ -> {error, Success}
     end,
     {reply, Reply, State};
-
-handle_call(shutdown, _From, State) ->
-    {stop, normal, State};
 
 handle_call({echo, Msg}, _From, State) ->
     io:format("Received echo: ~p~n", [Msg]),
@@ -84,10 +81,6 @@ handle_call(_Request, _From, State) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
-
-handle_cast(shutdown, State) ->
-    io:format("Shutting down ~p...~n", [?MODULE]),
-    {stop, normal, State};
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
@@ -123,6 +116,6 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 
 %% A store node has told us it saved a chunk
-stored_chunk(FileChunk, Node) ->
-    %% TODO: Implement
+stored_chunk(ChunkMeta, Node) ->
+    %% TODO: Implement. Write record to mnesia.
     error.

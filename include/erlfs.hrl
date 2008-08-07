@@ -6,6 +6,8 @@
 %% Macros
 -define('DATA_DIR', "/home/mwilliamson/erlfs/data").
 -define('RPC_TIMEOUT', 2000).
+-define('CHUNK_TRANSFER_TIMEOUT', 15000).
+-define('CHUNK_MAX_SIZE', 4194304). %% 4MB
 
 %% Mnesia Records
 -record(file_meta, {full_path="", path="", name="", size=0, 

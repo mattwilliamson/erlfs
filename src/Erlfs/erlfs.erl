@@ -11,7 +11,7 @@
 -include("erlfs.hrl").
 
 %% API
--export([whereis_registered/1]).
+-export([whereis_gen_server/1]).
 
 %%====================================================================
 %% API

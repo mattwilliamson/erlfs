@@ -1,8 +1,8 @@
 %%%-------------------------------------------------------------------
 %%% File    : erlfs_store_worker_fsm.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : This module takes care of saving a file chunk and 
-%%% the initial replication of it.
+%%% Description : This module takes care of storing and retrieving 
+%%% file chunks from the local filesystem.
 %%%
 %%% Created :  1 Aug 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
@@ -19,8 +19,15 @@
 -export([init/1, handle_event/3,
 	 handle_sync_event/4, handle_info/3, terminate/3, code_change/4]).
 
-%% States
--export([storing_chunk/2, notifying_tracker/2, replicating/2, done/2]).
+%% STATES
+%% Store chunk
+-export([storing_chunk/2, notifying_tracker/2]).
+
+%% Get Chunk
+-export([getting_chunk/2]).
+
+%% Common
+-export([done/2]).
 
 %%====================================================================
 %% API
@@ -46,8 +53,13 @@ start_link(FileChunk) ->
 %% gen_fsm:start_link/3,4, this function is called by the new process to 
 %% initialize. 
 %%--------------------------------------------------------------------
-init(FileChunk) ->
-    {ok, storing_chunk, FileChunk}.
+init(StartArg) ->
+    case StartArg of
+	{store_chunk, Chunk} ->
+	    {ok, storing_chunk, Chunk};
+	{get_chunk, Args} ->
+	    {ok, getting_chunk, Args}
+    end.
 
 %%--------------------------------------------------------------------
 %% Function: 
@@ -61,12 +73,14 @@ init(FileChunk) ->
 %% the current state name StateName is called to handle the event. It is also 
 %% called if a timeout occurs. 
 %%--------------------------------------------------------------------
-storing_chunk(_Event, FileChunk) ->
+
+%% States to store a chunk
+storing_chunk(_Event, Chunk) ->
     case erlfs_store_lib:store_chunk() of
 	ok ->
-	    {next_state, notifying_tracker, FileChunk};
+	    {next_state, notifying_tracker, Chunk};
 	{error, Reason} ->
-	    {stop, {file, Reason}, FileChunk#chunk.chunk_meta}
+	    {stop, {file, Reason}, Chunk#chunk.chunk_meta}
     end.
 
 notifying_tracker(_Event, ChunkMeta) ->
@@ -79,6 +93,18 @@ notifying_tracker(_Event, ChunkMeta) ->
 	    {next_state, notifying_tracker, ChunkMeta}
     end.
 
+%% States to get a chunk
+getting_chunk(_Event, {From, Ref, ChunkMeta}) ->
+    case erlfs_store_lib:get_chunk(ChunkMeta) of
+	{ok, Chunk} ->
+	    From ! {get_chunk, Ref, Chunk},
+	    {ok, done, nostate};
+	Error = {error, _Reason} -> 
+	    From ! {error, Ref, Error},
+	    {stop, Error, nostate}
+    end.
+
+%% Common states
 done(_Event, State) ->
     {stop, done, State}.
 
@@ -130,7 +156,7 @@ handle_event(_Event, StateName, State) ->
 %% gen_fsm:sync_send_all_state_event/2,3, this function is called to handle
 %% the event.
 %%--------------------------------------------------------------------
-handle_sync_event(Event, From, StateName, State) ->
+handle_sync_event(_Event, _From, StateName, State) ->
     Reply = ok,
     {reply, Reply, StateName, State}.
 
@@ -171,10 +197,9 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 notify_tracker([Node|Trackers], ChunkMeta) ->
     %% Notify a tracker that this node has stored a chunk
     %% Try until we get a good tracker or we run out
-    Ref = make_ref(),
     Message = {stored_chunk, ChunkMeta, node()},
     case gen_server:call({erlfs_tracker_svr, Node}, Message) of
-	{ack, stored_chunk} ->
+	{ok, stored_chunk} ->
 	    ok;
 	_ ->
 	    notify_tracker(Trackers, ChunkMeta)

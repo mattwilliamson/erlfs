@@ -11,7 +11,7 @@
 -include("erlfs.hrl").
 
 %% API
--export([store_file_chunk/1]).
+-export([store_file_chunk/1, get_chunk/1]).
 
 %%====================================================================
 %% API
@@ -27,26 +27,19 @@
 %% The chunk will be stored under the filename n, where n is the chunk
 %% number.
 %%--------------------------------------------------------------------
-store_file_chunk(#chunk{chunk_meta=#chunk_meta{
-			  file_meta=#file_meta{
-			    full_path=FullPath, 
-			    path=Path, 
-			    name=_Name, 
-			    size=Size, 
-			    created={_CreatedDate, _CreatedTime}}, 
-			  number=Number, 
-			  size=Size, 
-			  nodes=_Nodes}, 
-			data=Data}) ->
-    DirPathHash = crypto:sha(Path),
-    FilePathHash = crypto:sha(FullPath),
-    FinalPath = hash_to_path(DirPathHash) ++ hash_to_path(FilePathHash),
-    ok = file_lib:ensure_dir(FinalPath), % make sure entire path exists
-    File = file:open(?DATA_DIR ++ "/" ++ FinalPath ++ "." ++ Number, 
-		     [write, raw]),
-    Status = file:write(File, Data),
-    file:close(File),
-    Status.
+store_file_chunk(Chunk) ->
+    ChunkMeta = Chunk#chunk.chunk_meta,
+    Data = Chunk#chunk.data,
+    FinalPath = chunk_to_path(ChunkMeta),
+    %% Create any folders necessary
+    ok = file_lib:ensure_dir(FinalPath),
+    file:write_file(FinalPath, Data).
+
+
+get_chunk(ChunkMeta) ->
+    FinalPath = chunk_to_path(ChunkMeta),
+    {ok, Data} = file:read_file(FinalPath),
+    #chunk{chunk_meta=ChunkMeta, data=Data}.
 
 
 %%====================================================================
@@ -61,3 +54,17 @@ hash_to_path(HashString) when is_list(HashString) ->
     hash_to_path(HashString).
 hash_to_path([A,B|Rest], NewList) ->
     hash_to_path(Rest, [A ++ B ++ "/" | NewList]).
+
+chunk_to_path(#chunk_meta{
+		file_meta=#file_meta{
+		  full_path=FullPath, 
+		  path=Path, 
+		  name=_Name}, 
+		number=Number}) ->
+    %% Determine the filesystem location of a file chunk
+    %% Yields something like /ab/cd/ef/12/34/56/78/90/AB/.../0
+    DirPathHash = crypto:sha(Path),
+    FilePathHash = crypto:sha(FullPath),
+    FinalPath = filename:join([?DATA_DIR, hash_to_path(DirPathHash), 
+			       hash_to_path(FilePathHash), Number]),
+    FinalPath.
