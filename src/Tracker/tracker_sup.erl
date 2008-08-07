@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_supervisor.erl
+%%% File    : supervisor.erl
 %%% Author  : Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
 %%% Description : This is the top supervisor. It will start and
 %%% monitor the ErlFS tracker server.
 %%%
 %%% Created : 21 Jul 2008 by Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
 %%%-------------------------------------------------------------------
--module(erlfs_tracker_sup).
+-module(erlfs.tracker_sup).
 
 -behaviour(supervisor).
 
@@ -41,9 +41,9 @@ start_link(StartArgs) ->
 %% specifications.
 %%--------------------------------------------------------------------
 init(StartArgs) ->
-    ErlFSTracker = {erlfs_tracker_svr, 
-		   {erlfs_tracker_svr, start_link, StartArgs},
-		   permanent, 2000, worker, [erlfs_tracker_svr]},
+    ErlFSTracker = {erlfs.tracker_svr, 
+		   {erlfs.tracker_svr, start_link, StartArgs},
+		   permanent, 2000, worker, [erlfs.tracker_svr]},
     {ok, {{one_for_one, 5, 1}, [ErlFSTracker]}}.
 
 %%====================================================================

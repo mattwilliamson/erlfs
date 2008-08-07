@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_lib.erl
+%%% File    : store_lib.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
 %%% Description : This is a library module for erlfs_store_svr to
 %%% perform common tasks.
 %%%
 %%% Created : 24 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs_store_lib).
+-module(erlfs.store_lib).
 
 -include("erlfs.hrl").
 

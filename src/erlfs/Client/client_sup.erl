@@ -1,17 +1,16 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_worker_sup.erl
+%%% File    : client_sup.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : This is a simple_one_for_one supervisor where worker
-%%% processes are spawned to save and replicate file chunks.
+%%% Description : This is the top supervisor for the ErlFS client.
 %%%
-%%% Created :  1 Aug 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs_store_worker_sup).
+-module(erlfs.client_sup).
 
 -behaviour(supervisor).
 
 %% API
--export([start_link/0]).
+-export([start_link/1]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -25,8 +24,8 @@
 %% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
 %% Description: Starts the supervisor
 %%--------------------------------------------------------------------
-start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+start_link(StartArgs) ->
+    supervisor:start_link({local, ?SERVER}, ?MODULE, StartArgs).
 
 %%====================================================================
 %% Supervisor callbacks
@@ -40,12 +39,10 @@ start_link() ->
 %% to find out about restart strategy, maximum restart frequency and child 
 %% specifications.
 %%--------------------------------------------------------------------
-init(Chunk) ->
-    {ok, {{simple_one_for_one, 0, 1},
-          [{erlfs_store_worker_fsm, 
-	    {erlfs_store_worker_fsm, start_link, Chunk},
-            temporary, brutal_kill, worker, 
-	    [erlfs_store_worker_fsm]}]}}.
+init(StartArgs) ->
+    ErlFSClient = {erlfs.client_svr,{erlfs.client_svr, start_link, StartArgs},
+	      permanent, 2000, worker, [erlfs.client_svr]},
+    {ok,{{one_for_one, 0, 1}, [ErlFSClient]}}.
 
 %%====================================================================
 %% Internal functions

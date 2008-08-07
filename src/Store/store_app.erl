@@ -1,11 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_client_app.erl
+%%% File    : store_app.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : ErlFS client application.
+%%% Description : This application is used to store chunks in an 
+%%% ErlFS cluster.
 %%%
 %%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs_client_app).
+-module(erlfs.store_app).
 
 -behaviour(application).
 
@@ -26,7 +27,7 @@
 %% top supervisor of the tree.
 %%--------------------------------------------------------------------
 start(_Type, StartArgs) ->
-    case erlfs_client_sup:start_link(StartArgs) of
+    case erlfs.store_sup:start_link(StartArgs) of
 	{ok, Pid} -> 
 	    {ok, Pid};
 	Error ->

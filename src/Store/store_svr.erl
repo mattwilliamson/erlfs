@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_svr.erl
+%%% File    : store_svr.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
 %%% Description : ErlFS storage server. This does the actual file
 %%% chunk storage.
 %%%
 %%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs_store_svr).
+-module(erlfs.store_svr).
 
 -include("erlfs.hrl").
 
@@ -61,14 +61,14 @@ handle_call({store_chunk, Chunk}, From, State) ->
     Reply = storing_chunk,
     %% Reply immediately so other clients can perform calls.
     gen_server:reply(From, Reply),
-    supervisor:start_child(erlfs_store_worker_sup, {store_chunk, Chunk}),
+    supervisor:start_child(erlfs.store_worker_sup, {store_chunk, Chunk}),
     {reply, Reply, State};
 
 handle_call({get_chunk, Ref, ChunkMeta}, From, State) ->
     Reply = storing_chunk,
     gen_server:reply(From, Reply),
     WorkerArg = {get_chunk, {From, Ref, ChunkMeta}},
-    supervisor:start_child(erlfs_store_worker_sup, WorkerArg),
+    supervisor:start_child(erlfs.store_worker_sup, WorkerArg),
     {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
