@@ -2,7 +2,7 @@
   	      		     {description, "Erlang distributed 
 			     		   file storage system tracker."},
   	      		     {vsn, ".1"},
-	      		     {modules, [erlfs_tracker, erlfs.tracker_sup, 
+	      		     {modules, [erlfs_tracker, erlfs_tracker_sup, 
 			     	       erlfs_tracker_svr, erlfs_tracker_lib]},
 				       {registered, [erlfs_tracker_svr]},
 	      			       {applications, [kernel, stdlib, mnesia]}]}.
