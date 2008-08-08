@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(erlfs_client_lib).
 
--include("erlfs.hrl").
+-include("../include/erlfs.hrl").
 
 %% API
 -export([put_file/2, get_file/2]).

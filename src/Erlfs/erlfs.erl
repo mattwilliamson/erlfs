@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : util.erl
+%%% File    : erlfs.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
 %%% Description : Erlfs common functions. These are used across
 %%% multiple servers (i.e. Client, Tracker and Store)
 %%%
 %%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs.util).
+-module(erlfs).
 
 -include("erlfs.hrl").
 
