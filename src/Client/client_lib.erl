@@ -6,7 +6,7 @@
 %%%
 %%% Created : 24 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs.client_lib).
+-module(erlfs_client_lib).
 
 -include("erlfs.hrl").
 

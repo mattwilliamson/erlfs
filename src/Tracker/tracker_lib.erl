@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : tracker_lib.erl
+%%% File    : relfs_tracker_lib.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
 %%% Description : This module contains functions used by
 %%% erlfs.tracker_svr
 %%%
 %%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs.tracker_lib).
+-module(erlfs_tracker_lib).
 
 %% API
 -export([]).

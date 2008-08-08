@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : tracker_app.erl
-%%% Author  : Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
-%%% Description : This application tracks where file chunks are in an
+%%% File    : store_app.erl
+%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% Description : This application is used to store chunks in an 
 %%% ErlFS cluster.
 %%%
-%%% Created : 21 Jul 2008 by Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
+%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs.tracker_app).
+-module(erlfs.store_app).
 
 -behaviour(application).
 
@@ -27,11 +27,10 @@
 %% top supervisor of the tree.
 %%--------------------------------------------------------------------
 start(_Type, StartArgs) ->
-    case erlfs.tracker_sup:start_link(StartArgs) of
+    case erlfs_store_sup:start_link(StartArgs) of
 	{ok, Pid} -> 
 	    {ok, Pid};
 	Error ->
-	    io:format("Error starting erlfs.tracker_sup"),
 	    Error
     end.
 

@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : store_worker_fsm.erl
+%%% File    : erlfs_store_worker_fsm.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
 %%% Description : This module takes care of storing and retrieving 
 %%% file chunks from the local filesystem.
 %%%
 %%% Created :  1 Aug 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs.store_worker_fsm).
+-module(erlfs_store_worker_fsm).
 
 -include("erlfs.hrl").
 
@@ -76,7 +76,7 @@ init(StartArg) ->
 
 %% States to store a chunk
 storing_chunk(_Event, Chunk) ->
-    case erlfs.store_lib:store_chunk() of
+    case erlfs_store_lib:store_chunk() of
 	ok ->
 	    {next_state, notifying_tracker, Chunk};
 	{error, Reason} ->
@@ -85,7 +85,7 @@ storing_chunk(_Event, Chunk) ->
 
 notifying_tracker(_Event, ChunkMeta) ->
     %% Tell a tracker that we have stored the chunk
-    Trackers = erlfs.util:whereis_gen_server(erlfs.tracker_svr),
+    Trackers = erlfs_util:whereis_gen_server(erlfs_tracker_svr),
     case notify_tracker(Trackers, ChunkMeta) of
 	ok -> {next_state, done, nostate};
 	%% Try to alert a tracker until successful
@@ -95,7 +95,7 @@ notifying_tracker(_Event, ChunkMeta) ->
 
 %% States to get a chunk
 getting_chunk(_Event, {From, Ref, ChunkMeta}) ->
-    case erlfs.store_lib:get_chunk(ChunkMeta) of
+    case erlfs_store_lib:get_chunk(ChunkMeta) of
 	{ok, Chunk} ->
 	    From ! {get_chunk, Ref, Chunk},
 	    {ok, done, nostate};
@@ -198,7 +198,7 @@ notify_tracker([Node|Trackers], ChunkMeta) ->
     %% Notify a tracker that this node has stored a chunk
     %% Try until we get a good tracker or we run out
     Message = {stored_chunk, ChunkMeta, node()},
-    case gen_server:call({erlfs.tracker_svr, Node}, Message) of
+    case gen_server:call({erlfs_tracker_svr, Node}, Message) of
 	{ok, stored_chunk} ->
 	    ok;
 	_ ->

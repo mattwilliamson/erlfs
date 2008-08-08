@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : client_svr.erl
+%%% File    : erlfs_client_svr.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
 %%% Description : This server runs as a client to an ErlFS cluster
 %%% and provides interfaces to the outside world (i.e. HTTP)
 %%%
 %%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs.client_svr).
+-module(erlfs_client_svr).
 
 -behaviour(gen_server).
 

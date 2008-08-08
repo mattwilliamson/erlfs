@@ -1,12 +1,14 @@
 %%%-------------------------------------------------------------------
-%%% File    : store_svr.erl
-%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : ErlFS storage server. This does the actual file
-%%% chunk storage.
+%%% File    : erlfs_server.erl
+%%% Author  : Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
+%%% Description : This is the ErlFS tracker server. It keeps track of 
+%%% where file chunks are stored.
 %%%
-%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% Created : 21 Jul 2008 by Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
 %%%-------------------------------------------------------------------
--module(erlfs.store_svr).
+-module(erlfs_tracker_svr).
+
+-define(SERVER, ?MODULE).
 
 -include("erlfs.hrl").
 
@@ -21,8 +23,6 @@
 
 -record(state, {}).
 
--define(SERVER, ?MODULE).
-
 %%====================================================================
 %% API
 %%====================================================================
@@ -31,6 +31,7 @@
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start_link() ->
+    io:format("Starting ~p...~n", [?MODULE]),
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 %%====================================================================
@@ -44,11 +45,11 @@ start_link() ->
 %%                         {stop, Reason}
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
-init([]) ->
+init(_StartArgs) ->
     {ok, #state{}}.
 
 %%--------------------------------------------------------------------
-%% Function: %% handle_call(Request, From, State) -> {reply, Reply, State} |
+%% Function: handle_call(Request, From, State) -> {reply, Reply, State} |
 %%                                      {reply, Reply, State, Timeout} |
 %%                                      {noreply, State} |
 %%                                      {noreply, State, Timeout} |
@@ -57,19 +58,18 @@ init([]) ->
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
 
-handle_call({store_chunk, Chunk}, From, State) ->
-    Reply = storing_chunk,
-    %% Reply immediately so other clients can perform calls.
-    gen_server:reply(From, Reply),
-    supervisor:start_child(erlfs.store_worker_sup, {store_chunk, Chunk}),
+handle_call({stored_chunk, ChunkMeta, Node}, From, State) ->
+    gen_server:reply(From),
+    Success = stored_chunk(ChunkMeta, Node),
+    Reply = case Success of
+	ok -> {ok, stored_chunk};
+	_ -> {error, Success}
+    end,
     {reply, Reply, State};
 
-handle_call({get_chunk, Ref, ChunkMeta}, From, State) ->
-    Reply = storing_chunk,
-    gen_server:reply(From, Reply),
-    WorkerArg = {get_chunk, {From, Ref, ChunkMeta}},
-    supervisor:start_child(erlfs.store_worker_sup, WorkerArg),
-    {reply, Reply, State};
+handle_call({echo, Msg}, _From, State) ->
+    io:format("Received echo: ~p~n", [Msg]),
+    {reply, ok, State};
 
 handle_call(_Request, _From, State) ->
     Reply = ok,
@@ -81,6 +81,7 @@ handle_call(_Request, _From, State) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling cast messages
 %%--------------------------------------------------------------------
+
 handle_cast(_Msg, State) ->
     {noreply, State}.
 
@@ -113,3 +114,8 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 %%% Internal functions
 %%--------------------------------------------------------------------
+
+%% A store node has told us it saved a chunk
+stored_chunk(ChunkMeta, Node) ->
+    %% TODO: Implement. Write record to mnesia.
+    error.
