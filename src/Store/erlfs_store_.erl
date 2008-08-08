@@ -1,17 +1,17 @@
 %%%-------------------------------------------------------------------
-%%% File    : store_app.erl
+%%% File    : erlfs_store_app.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
 %%% Description : This application is used to store chunks in an 
 %%% ErlFS cluster.
 %%%
 %%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs.store_app).
+-module(erlfs_store_app).
 
 -behaviour(application).
 
 %% Application callbacks
--export([start/2, stop/1]).
+-export([start/2, start/0, stop/1]).
 
 %%====================================================================
 %% Application callbacks
@@ -26,6 +26,9 @@
 %% OTP design principles as a supervision tree, this means starting the
 %% top supervisor of the tree.
 %%--------------------------------------------------------------------
+start() ->
+    application:start(erlfs_store).
+
 start(_Type, StartArgs) ->
     case erlfs_store_sup:start_link(StartArgs) of
 	{ok, Pid} -> 

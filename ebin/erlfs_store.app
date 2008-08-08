@@ -1,5 +1,5 @@
-{application, erlfs.store, [{mod, {erlfs.store_app, []}},
+{application, erlfs_store, [{mod, {erlfs_store_app, []}},
 	      {description, "Erlang distributed file storage system storage node application."},
 	      {vsn, ".1"},
-	      {registered, [erlfs.store_svr]},
+	      {registered, [erlfs_store_svr]},
 	      {applications, [kernel, stdlib, crypto]}]}.
