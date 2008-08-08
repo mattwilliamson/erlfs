@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_server.erl
+%%% File    : erlfs_tracker_svr.erl
 %%% Author  : Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
 %%% Description : This is the ErlFS tracker server. It keeps track of 
 %%% where file chunks are stored.
@@ -31,7 +31,6 @@
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start_link() ->
-    io:format("Starting ~p...~n", [?MODULE]),
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 %%====================================================================
@@ -58,7 +57,7 @@ init(_StartArgs) ->
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
 
-handle_call({stored_chunk, ChunkMeta, Node}, _From, State) ->
+handle_call({stored_chunk, ChunkMeta, Node}, From, State) ->
     gen_server:reply(From),
     Success = stored_chunk(ChunkMeta, Node),
     Reply = case Success of
@@ -66,10 +65,6 @@ handle_call({stored_chunk, ChunkMeta, Node}, _From, State) ->
 	_ -> {error, Success}
     end,
     {reply, Reply, State};
-
-handle_call({echo, Msg}, _From, State) ->
-    io:format("Received echo: ~p~n", [Msg]),
-    {reply, ok, State};
 
 handle_call(_Request, _From, State) ->
     Reply = ok,

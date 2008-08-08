@@ -1,6 +1,9 @@
+SRCS=src/*/*.erl ebin/*.rel
+OUT=ebin
+
 all:
-	erlc -I include -pa ebin -o ebin -v src/*/*.erl
+	erlc -I include -pa $(OUT) -o $(OUT) -v $(SRCS)
 	
 clean:
-	rm ebin/*.beam
+	rm -f $(OUT)/*.beam $(OUT)/*.script $(OUT)/*.boot
 	
