@@ -1,12 +1,11 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_tracker.erl
-%%% Author  : Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
-%%% Description : This application tracks where file chunks are in an
-%%% ErlFS cluster.
+%%% File    : erlfs_client.erl
+%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% Description : ErlFS client application.
 %%%
-%%% Created : 21 Jul 2008 by Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
+%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs_tracker).
+-module(erlfs_client).
 
 -behaviour(application).
 
@@ -27,11 +26,10 @@
 %% top supervisor of the tree.
 %%--------------------------------------------------------------------
 start(_Type, StartArgs) ->
-    case erlfs_tracker_sup:start_link(StartArgs) of
+    case erlfs_client_sup:start_link(StartArgs) of
 	{ok, Pid} -> 
 	    {ok, Pid};
 	Error ->
-	    io:format("Error starting erlfs_tracker_sup"),
 	    Error
     end.
 
