@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_app.erl
+%%% File    : erlfs_store.erl
 %%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
 %%% Description : This application is used to store chunks in an 
 %%% ErlFS cluster.
 %%%
 %%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
--module(erlfs_store_app).
+-module(erlfs_store).
 
 -behaviour(application).
 
