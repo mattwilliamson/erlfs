@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-erl -pa ebin -setcookie abc123 -boot erlfs-alpha
+erl -init_debug -pa ebin -setcookie abc123 -boot erlfs-alpha

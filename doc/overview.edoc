@@ -1,0 +1,6 @@
+@author Matt Williamson <mwilliamson@dawsdesign.com>
+@copyright 2008 Matt Williamson
+@version alpha
+@title ErlFS Distributed File Storage System
+@doc ErlFS aims to leverage distributed Elang and mnesia to spread files across multiple nodes for performance, redundany and scalability. Ideally, to add capacity to a cluster, you need only add storage nodes.
+@reference http://erlfs.com

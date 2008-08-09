@@ -1,0 +1,17 @@
+{packages,[]}.
+{modules,[erlfs_client,
+          erlfs_client_lib,
+          erlfs_client_sup,
+          erlfs_client_svr,
+          erlfs_store,
+          erlfs_store_lib,
+          erlfs_store_sup,
+          erlfs_store_svr,
+          erlfs_store_worker_fsm,
+          erlfs_store_worker_sup,
+          erlfs_tracker,
+          erlfs_tracker_lib,
+          erlfs_tracker_sup,
+          erlfs_tracker_svr,
+          erlfs_util,
+          erltl]}.

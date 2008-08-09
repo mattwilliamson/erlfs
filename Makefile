@@ -1,9 +1,12 @@
-SRCS=src/*/*.erl ebin/*.rel
-OUT=ebin
+SRCS=src/*.erl ebin/*.rel
+BIN=ebin
 
 all:
-	erlc -I include -pa $(OUT) -o $(OUT) -v $(SRCS)
+# Compile bytecode
+	erlc -I include -pa $(BIN) -o $(BIN) -v $(SRCS)
+# Compile documentation
+	erl -noshell -eval 'edoc:files(filelib:wildcard("src/*.erl"), [{dir, "doc"}]).' -s init stop
 	
 clean:
-	rm -f $(OUT)/*.beam $(OUT)/*.script $(OUT)/*.boot
+	rm -f $(BIN)/*.beam $(BIN)/*.script $(BIN)/*.boot
 	
