@@ -13,5 +13,4 @@
           erlfs_tracker_lib,
           erlfs_tracker_sup,
           erlfs_tracker_svr,
-          erlfs_util,
-          erltl]}.
+          erlfs_util]}.

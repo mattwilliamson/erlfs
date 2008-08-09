@@ -1,4 +1,4 @@
-SRCS=src/*.erl ebin/*.rel
+SRCS=src/*.erl src/*/*.erl ebin/*.rel
 BIN=ebin
 
 all:
