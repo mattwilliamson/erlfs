@@ -1,4 +1,4 @@
-SRCS=src/*.erl src/*/*.erl ebin/*.rel
+SRCS=src/*.erl src/*/*.erl
 BIN=ebin
 
 all:
@@ -8,5 +8,5 @@ all:
 	erl -noshell -eval 'edoc:files(filelib:wildcard("src/*.erl"), [{dir, "doc"}]).' -s init stop
 	
 clean:
-	rm -f $(BIN)/*.beam $(BIN)/*.script $(BIN)/*.boot
+	rm -f $(BIN)/*
 	
