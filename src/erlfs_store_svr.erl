@@ -1,13 +1,11 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_svr.erl
-%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : ErlFS storage server. This does the actual file
+%%% @author Matt Williamson <mwilliamson@dawsdesign.com>
+%%% @doc ErlFS storage server. This does the actual file
 %%% chunk storage.
-%%%
-%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
 %%%-------------------------------------------------------------------
 -module(erlfs_store_svr).
 
+%% @headerfile "../include/erlfs.hrl"
 -include("erlfs.hrl").
 
 -behaviour(gen_server).

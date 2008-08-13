@@ -1,7 +1,11 @@
-%%% File    : erlfs.hrl
-%%% Author  : Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
-%%% Description : Holds global definitions for ErlFS
-%%% Created : 21 Jul 2008 by Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
+%%--------------------------------------------------------------------
+%% Erlfs main include file.
+%%--------------------------------------------------------------------
+
+%% Types
+%% @type file_id() = string(). Special ID returned when storing a File.
+%% @type chunk_number() = integer(). The nth chunk of a file. 0-based.
+%% @type chunk_id() = {file_id, chunk_number}.
 
 %% Macros
 -define('DATA_DIR', "/home/mwilliamson/erlfs/data").
