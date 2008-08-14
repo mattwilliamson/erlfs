@@ -1,10 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_worker_fsm.erl
-%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : This module takes care of storing and retrieving 
+%%% @private
+%%%
+%%% @author Matt Williamson <mwilliamson@dawsdesign.com>
+%%%
+%%% @doc This module takes care of storing and retrieving 
 %%% file chunks from the local filesystem.
 %%%
-%%% Created :  1 Aug 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% @end
 %%%-------------------------------------------------------------------
 -module(erlfs_store_worker_fsm).
 
@@ -33,10 +35,13 @@
 %% API
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Function: start_link() -> ok,Pid} | ignore | {error,Error}
-%% Description:Creates a gen_fsm process which calls Module:init/1 to
+%% @spec start_link(FileChunk) -> {ok, Pid} | ignore | {error, Error}
+%% 
+%% @doc Creates a gen_fsm process which calls Module:init/1 to
 %% initialize. To ensure a synchronized start-up procedure, this function
 %% does not return until Module:init/1 has returned.  
+%%
+%% @end
 %%--------------------------------------------------------------------
 start_link(FileChunk) ->
     gen_fsm:start_link(?MODULE, FileChunk, []).
@@ -45,13 +50,15 @@ start_link(FileChunk) ->
 %% gen_fsm callbacks
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Function: init(Args) -> {ok, StateName, State} |
+%% @spec init(Args) -> {ok, StateName, State} |
 %%                         {ok, StateName, State, Timeout} |
 %%                         ignore                              |
 %%                         {stop, StopReason}                   
-%% Description:Whenever a gen_fsm is started using gen_fsm:start/[3,4] or
+%% @doc Whenever a gen_fsm is started using gen_fsm:start/[3,4] or
 %% gen_fsm:start_link/3,4, this function is called by the new process to 
 %% initialize. 
+%%
+%% @end
 %%--------------------------------------------------------------------
 init(StartArg) ->
     case StartArg of
@@ -62,19 +69,17 @@ init(StartArg) ->
     end.
 
 %%--------------------------------------------------------------------
-%% Function: 
-%% state_name(Event, State) -> {next_state, NextStateName, NextState}|
+%% States to store a chunk
+%%--------------------------------------------------------------------
+%% @spec storing_chunk(Event, State) -> {next_state, NextStateName, NextState}|
 %%                             {next_state, NextStateName, 
 %%                                NextState, Timeout} |
 %%                             {stop, Reason, NewState}
-%% Description:There should be one instance of this function for each possible
-%% state name. Whenever a gen_fsm receives an event sent using
-%% gen_fsm:send_event/2, the instance of this function with the same name as
-%% the current state name StateName is called to handle the event. It is also 
-%% called if a timeout occurs. 
+%%
+%% @doc *STATE* Currently saving the chunk to the filesystem.
+%% 
+%% @end
 %%--------------------------------------------------------------------
-
-%% States to store a chunk
 storing_chunk(_Event, Chunk) ->
     case erlfs_store_lib:store_chunk() of
 	ok ->
@@ -83,6 +88,17 @@ storing_chunk(_Event, Chunk) ->
 	    {stop, {file, Reason}, Chunk#chunk.chunk_meta}
     end.
 
+%%--------------------------------------------------------------------
+%% @spec notifying_tracker(Event, State) -> {next_state, NextStateName, NextState}|
+%%                             {next_state, NextStateName, 
+%%                                NextState, Timeout} |
+%%                             {stop, Reason, NewState}
+%%
+%% @doc *STATE* Currently notifying a tracker that this node has saved
+%% a file chunk to keep track of it.
+%% 
+%% @end
+%%--------------------------------------------------------------------
 notifying_tracker(_Event, ChunkMeta) ->
     %% Tell a tracker that we have stored the chunk
     Trackers = erlfs:whereis_gen_server(erlfs_tracker_svr),
@@ -93,7 +109,18 @@ notifying_tracker(_Event, ChunkMeta) ->
 	    {next_state, notifying_tracker, ChunkMeta}
     end.
 
+%%--------------------------------------------------------------------
 %% States to get a chunk
+%%--------------------------------------------------------------------
+%% @spec getting_chunk(Event, State) -> {next_state, NextStateName, NextState}|
+%%                             {next_state, NextStateName, 
+%%                                NextState, Timeout} |
+%%                             {stop, Reason, NewState}
+%%
+%% @doc *STATE* Currently getting a chunk off the filesystem.
+%% 
+%% @end
+%%--------------------------------------------------------------------
 getting_chunk(_Event, {From, Ref, ChunkMeta}) ->
     case erlfs_store_lib:get_chunk(ChunkMeta) of
 	{ok, Chunk} ->
@@ -104,9 +131,22 @@ getting_chunk(_Event, {From, Ref, ChunkMeta}) ->
 	    {stop, Error, nostate}
     end.
 
+%%--------------------------------------------------------------------
 %% Common states
+%%--------------------------------------------------------------------
+%% @spec done(Event, State) -> {next_state, NextStateName, NextState}|
+%%                             {next_state, NextStateName, 
+%%                                NextState, Timeout} |
+%%                             {stop, Reason, NewState}
+%%
+%% @doc *STATE* Finished doing work.
+%% 
+%% @end
+%%--------------------------------------------------------------------
 done(_Event, State) ->
     {stop, done, State}.
+
+% @todo FINISH DOCS
 
 %%--------------------------------------------------------------------
 %% Function:

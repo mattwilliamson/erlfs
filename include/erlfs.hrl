@@ -1,11 +1,12 @@
-%%--------------------------------------------------------------------
-%% Erlfs main include file.
-%%--------------------------------------------------------------------
+%%%====================================================================
+%%% Erlfs main include file.
+%%%====================================================================
 
 %% Types
-%% @type file_id() = string(). Special ID returned when storing a File.
+%% @type file_id() = string(). Special ID returned when calling 
+%% {@link erlfs_client:file_store/2}.
 %% @type chunk_number() = integer(). The nth chunk of a file. 0-based.
-%% @type chunk_id() = {file_id, chunk_number}.
+%% @type chunk_id() = {file_id(), chunk_number()}.
 
 %% Macros
 -define('DATA_DIR', "/home/mwilliamson/erlfs/data").

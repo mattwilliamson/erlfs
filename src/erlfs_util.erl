@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_util.erl
-%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : Erlfs common functions. These are used across
+%%% @author Matt Williamson <mwilliamson@mwvmubhhlap>
+%%%
+%%% @doc Erlfs common utility functions. These are used across
 %%% multiple servers (i.e. Client, Tracker and Store)
 %%%
-%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% @end
 %%%-------------------------------------------------------------------
 -module(erlfs_util).
 
@@ -17,32 +17,38 @@
 %% API
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Function: whereis_name(Name)
-%% Description: Gets a list of nodes that the calling process is
-%% connected to has a process is registered as Name
+%% @spec whereis_gen_server(PName) -> Nodes
+%%     Nodes = [node()]
+%%
+%% @doc Gets a list of nodes that the calling process is
+%% connected to and has a gen_server that is registered as PName.
+%% 
+%% This requeires the gen_server being located to be able to respond
+%% with the atom 'ok' for the message 'test'.
+%%
+%% @end
 %%--------------------------------------------------------------------
-
-%% Old version. Looks expensive, not based on benchmarks.
-%% whereis_registered(PName) ->
-%%     Nodes = nodes(),
-%%     Caller = self(),
-%%     Test = fun() -> 
-%% 		   HasName = lists:any(
-%% 			       fun(H) -> H == PName end, 
-%% 			       registered()),
-%% 		   Caller ! {hasname, node(), HasName}
-%% 	   end,
-%%     lists:foreach(fun(Node) ->
-%% 			  spawn(Node, Test) 
-%% 		  end, 
-%% 		  Nodes),
-%%     whereis_registered_collect(Nodes, []).
-
 whereis_gen_server(PName) ->
     Nodes = nodes(),
     Request = test,
     {Replies, _BadNodes} = gen_server:multi_call(Nodes, PName, Request),
-    [Node || {Node, ok}  <- Replies].
+    [Node || {Node, ok} <- Replies].
+
+% Old version. Looks expensive, not based on benchmarks.
+% whereis_registered(PName) ->
+%     Nodes = nodes(),
+%     Caller = self(),
+%     Test = fun() -> 
+% 		   HasName = lists:any(
+% 			       fun(H) -> H == PName end, 
+% 			       registered()),
+% 		   Caller ! {hasname, node(), HasName}
+% 	   end,
+%     lists:foreach(fun(Node) ->
+% 			  spawn(Node, Test) 
+% 		  end, 
+% 		  Nodes),
+%     whereis_registered_collect(Nodes, []).
 
 %%====================================================================
 %% Internal functions

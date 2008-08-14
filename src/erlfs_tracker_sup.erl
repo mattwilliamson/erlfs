@@ -1,10 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_supervisor.erl
-%%% Author  : Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
-%%% Description : This is the top supervisor. It will start and
+%%% @private
+%%%
+%%% @author Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
+%%%
+%%% @doc This is the top supervisor. It will start and
 %%% monitor the ErlFS tracker server.
 %%%
-%%% Created : 21 Jul 2008 by Matt Williamson <mwilliamson@mwilliamson-ubuntu-vm>
+%%% @end
 %%%-------------------------------------------------------------------
 -module(erlfs_tracker_sup).
 
@@ -22,8 +24,11 @@
 %% API functions
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Function: start_link(StartArgs) -> {ok,Pid} | ignore | {error,Error}
-%% Description: Starts the supervisor
+%% @spec start_link(StartArgs) -> {ok,Pid} | ignore | {error,Error}
+%%
+%% @doc Starts the supervisor
+%%
+%% @end
 %%--------------------------------------------------------------------
 start_link(StartArgs) ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, StartArgs).
@@ -32,13 +37,17 @@ start_link(StartArgs) ->
 %% Supervisor callbacks
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Func: init(Args) -> {ok,  {SupFlags,  [ChildSpec]}} |
+%% @spec init(StartArgs) -> {ok,  {SupFlags,  [ChildSpec]}} |
 %%                     ignore                          |
 %%                     {error, Reason}
-%% Description: Whenever a supervisor is started using 
+%%    StartArgs = [term()]
+%%
+%% @doc Whenever a supervisor is started using 
 %% supervisor:start_link/[2,3], this function is called by the new process 
 %% to find out about restart strategy, maximum restart frequency and child 
 %% specifications.
+%%
+%% @end
 %%--------------------------------------------------------------------
 init(StartArgs) ->
     ErlFSTracker = {erlfs_tracker_svr, 

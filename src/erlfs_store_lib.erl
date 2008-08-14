@@ -1,10 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_lib.erl
-%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : This is a library module for erlfs_store_svr to
+%%% @private
+%%%
+%%% @author Matt Williamson <mwilliamson@dawsdesign.com>
+%%%
+%%% @doc This is a library module for erlfs_store_svr to
 %%% perform common tasks.
 %%%
-%%% Created : 24 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% @end
 %%%-------------------------------------------------------------------
 -module(erlfs_store_lib).
 
@@ -17,8 +19,9 @@
 %% API
 %%====================================================================
 %%-------------------------------------------------------------------
-%% Function: store_file_chunk
-%% Description: Store a piece of a file on the filesystem.
+%% @spec store_file_chunk(Chunk) -> ok | {error, Reason}
+%%
+%% @doc Store a piece of a file on the filesystem.
 %%
 %% The path where it is stored is a) the folder path hashed and b)
 %% the file path + file name hashed. The hashes are split into two
@@ -26,6 +29,8 @@
 %% directories in on directory, as is limited by certain filesystems.
 %% The chunk will be stored under the filename n, where n is the chunk
 %% number.
+%%
+%% @end
 %%--------------------------------------------------------------------
 store_file_chunk(Chunk) ->
     ChunkMeta = Chunk#chunk.chunk_meta,
@@ -45,9 +50,18 @@ get_chunk(ChunkMeta) ->
 %%====================================================================
 %% Internal Functions
 %%====================================================================
-%%-------------------------------------------------------------------
-
-%% Converts hash e.g. abcdef... to directory path e.g. /ab/cd/ef..
+%%--------------------------------------------------------------------
+%% @spec hash_to_path(HashBinary) -> HashPath
+%%     HashBinary = binary()
+%%     HashPath = string()
+%%
+%% @doc Converts hash e.g. abcdef... to directory path e.g. 
+%% /ab/cd/ef/12/34/56....
+%% This is the method to spread files across many directories to avoid
+%% OS errors due to either path too long or too many files/directories.
+%%
+%% @end
+%%--------------------------------------------------------------------
 hash_to_path(HashBinary) when is_binary(HashBinary) ->
     hash_to_path(binary_to_list(HashBinary), []);
 hash_to_path(HashString) when is_list(HashString) ->
@@ -55,14 +69,21 @@ hash_to_path(HashString) when is_list(HashString) ->
 hash_to_path([A,B|Rest], NewList) ->
     hash_to_path(Rest, [A ++ B ++ "/" | NewList]).
 
+%%--------------------------------------------------------------------
+%% @spec chunk_to_path(ChunkMeta) -> Path
+%%     Path = string()
+%%
+%% @doc Determine the filesystem location of a file chunk. Returns 
+%% something like /ab/cd/ef/12/34/56/78/90/AB/.../0
+%%
+%% @end
+%%--------------------------------------------------------------------
 chunk_to_path(#chunk_meta{
 		file_meta=#file_meta{
 		  full_path=FullPath, 
 		  path=Path, 
 		  name=_Name}, 
 		number=Number}) ->
-    %% Determine the filesystem location of a file chunk
-    %% Yields something like /ab/cd/ef/12/34/56/78/90/AB/.../0
     DirPathHash = crypto:sha(Path),
     FilePathHash = crypto:sha(FullPath),
     FinalPath = filename:join([?DATA_DIR, hash_to_path(DirPathHash), 

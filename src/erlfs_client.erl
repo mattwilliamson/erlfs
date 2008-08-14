@@ -1,9 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_client.erl
-%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : ErlFS client application.
+%%% @author Matt Williamson <mwilliamson@dawsdesign.com>
 %%%
-%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% @doc ErlFS client application. Clients call functions in this 
+%%% module to store and retrieve files.
+%%%
+%%% @headerfile "../include/erlfs.hrl"
+%%%
+%%% @end
 %%%-------------------------------------------------------------------
 -module(erlfs_client).
 
@@ -12,18 +15,59 @@
 %% Application callbacks
 -export([start/2, stop/1]).
 
+%% API
+-export([store_file/2, get_file/2]).
+
+%%====================================================================
+%% API
+%%====================================================================
+%% @spec store_file(File) -> file_id() | {error, Reason}
+%% 
+%% @doc Store a file chunk on a specified node. 
+%% Used by {@link erlfs_client}.
+%% The caller must recover if the specified node is down.
+%%
+%% @end
+%%--------------------------------------------------------------------
+
+store_file(File) ->
+    % @todo Implement
+    ok.
+
+%%--------------------------------------------------------------------
+%% @spec get_file(FileID) -> ok | {error, Reason}
+%%     FileID = file_id()
+%% 
+%% @doc Retrieve a file chunk from a specified node. 
+%% Used by {@link erlfs_client}.
+%% The caller must try a different node if the specified node is down.
+%%
+%% @end
+%%--------------------------------------------------------------------
+
+get_file(FileID) ->
+    % @todo Implement
+    ok.
+
 %%====================================================================
 %% Application callbacks
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Function: start(Type, StartArgs) -> {ok, Pid} |
+%% @private
+%%
+%% @spec start(Type, StartArgs) -> {ok, Pid} |
 %%                                     {ok, Pid, State} |
 %%                                     {error, Reason}
-%% Description: This function is called whenever an application 
+%% 
+%% @doc ** Application Callback ** 
+%%
+%% This function is called whenever an application 
 %% is started using application:start/1,2, and should start the processes
 %% of the application. If the application is structured according to the
 %% OTP design principles as a supervision tree, this means starting the
 %% top supervisor of the tree.
+%% 
+%% @end
 %%--------------------------------------------------------------------
 start(_Type, StartArgs) ->
     case erlfs_client_sup:start_link(StartArgs) of
@@ -34,10 +78,17 @@ start(_Type, StartArgs) ->
     end.
 
 %%--------------------------------------------------------------------
-%% Function: stop(State) -> void()
-%% Description: This function is called whenever an application
+%% @private
+%%
+%% @spec stop(State) -> void()
+%% 
+%% @doc ** Application Callback ** 
+%%
+%% This function is called whenever an application
 %% has stopped. It is intended to be the opposite of Module:start/2 and
 %% should do any necessary cleaning up. The return value is ignored. 
+%% 
+%% @end
 %%--------------------------------------------------------------------
 stop(_State) ->
     ok.

@@ -1,10 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_store_worker_sup.erl
-%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : This is a simple_one_for_one supervisor where worker
+%%% @private
+%%%
+%%% @author Matt Williamson <mwilliamson@dawsdesign.com>
+%%%
+%%% @doc This is a simple_one_for_one supervisor where worker
 %%% processes are spawned to save and replicate file chunks.
 %%%
-%%% Created :  1 Aug 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% @end
 %%%-------------------------------------------------------------------
 -module(erlfs_store_worker_sup).
 
@@ -22,8 +24,11 @@
 %% API functions
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Function: start_link() -> {ok,Pid} | ignore | {error,Error}
-%% Description: Starts the supervisor
+%% @spec start_link() -> {ok,Pid} | ignore | {error,Error}
+%% 
+%% @doc Starts the supervisor.
+%%
+%% @end
 %%--------------------------------------------------------------------
 start_link() ->
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
@@ -32,13 +37,16 @@ start_link() ->
 %% Supervisor callbacks
 %%====================================================================
 %%--------------------------------------------------------------------
-%% Func: init(Args) -> {ok,  {SupFlags,  [ChildSpec]}} |
+%% @spec init(Args) -> {ok,  {SupFlags,  [ChildSpec]}} |
 %%                     ignore                          |
 %%                     {error, Reason}
-%% Description: Whenever a supervisor is started using 
+%%
+%% @doc Whenever a supervisor is started using 
 %% supervisor:start_link/[2,3], this function is called by the new process 
 %% to find out about restart strategy, maximum restart frequency and child 
 %% specifications.
+%%
+%% @end
 %%--------------------------------------------------------------------
 init(Chunk) ->
     {ok, {{simple_one_for_one, 0, 1},

@@ -1,10 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% File    : erlfs_tracker_lib.erl
-%%% Author  : Matt Williamson <mwilliamson@mwvmubhhlap>
-%%% Description : This module contains functions used by
-%%% erlfs_tracker_svr
+%%% @private
 %%%
-%%% Created : 31 Jul 2008 by Matt Williamson <mwilliamson@mwvmubhhlap>
+%%% @author Matt Williamson <mwilliamson@dawsdesign.com>
+%%%
+%%% @doc This module contains functions used by
+%%% erlfs_tracker_svr.
+%%%
+%%% @end
 %%%-------------------------------------------------------------------
 -module(erlfs_tracker_lib).
 
