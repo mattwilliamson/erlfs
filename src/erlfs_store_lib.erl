@@ -78,14 +78,7 @@ hash_to_path([A,B|Rest], NewList) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-chunk_to_path(#chunk_meta{
-		file_meta=#file_meta{
-		  full_path=FullPath, 
-		  path=Path, 
-		  name=_Name}, 
-		number=Number}) ->
-    DirPathHash = crypto:sha(Path),
-    FilePathHash = crypto:sha(FullPath),
-    FinalPath = filename:join([?DATA_DIR, hash_to_path(DirPathHash), 
-			       hash_to_path(FilePathHash), Number]),
-    FinalPath.
+chunk_to_path(#chunk_meta{file_meta=#file_meta{id=ID}, 
+			  number=Number}) ->
+    {ok, DataDir} = application:get_env(data_dir),
+    filename:join([DataDir, hash_to_path(ID), Number]).

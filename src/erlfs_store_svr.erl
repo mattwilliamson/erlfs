@@ -65,21 +65,23 @@ init([]) ->
 %%
 %% @doc Handling call messages
 %%--------------------------------------------------------------------
-handle_call({store_chunk, Chunk}, From, State) ->
-    Reply = storing_chunk,
+handle_call({store_chunk, Chunk}, From, State) 
+  when is_record(Chunk, chunk) ->
+    Reply = {reply, storing_chunk,State},
     %% Reply immediately so other clients can perform calls.
     gen_server:reply(From, Reply),
     supervisor:start_child(erlfs_store_worker_sup, {store_chunk, Chunk}),
-    {reply, Reply, State};
+    Reply;
 
 handle_call({get_chunk, Ref, ChunkMeta}, From, State) ->
-    Reply = storing_chunk,
+    Reply = {reply, storing_chunk, State},
     gen_server:reply(From, Reply),
     WorkerArg = {get_chunk, {From, Ref, ChunkMeta}},
     supervisor:start_child(erlfs_store_worker_sup, WorkerArg),
-    {reply, Reply, State};
+    State;
 
 handle_call(_Request, _From, State) ->
+    % @todo Add error logging here
     Reply = ok,
     {reply, Reply, State}.
 
