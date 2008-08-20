@@ -7,6 +7,7 @@
 -module(erlfs_store).
 
 -include("erlfs.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 -behaviour(application).
 
@@ -15,9 +16,6 @@
 
 %% API
 -export([store_chunk/2, get_chunk/2]).
-
-%% Tests
--export([test_store_chunk/0]).
 
 -define(SERVER, erlfs_store_svr).
 
@@ -58,7 +56,7 @@ get_chunk(Node, ChunkID) ->
 %%--------------------------------------------------------------------
 %% @private
 %%
-%% @spec test_store_chunk() -> ok | {error, Reason}
+%% @spec store_chunk_test() -> ok | {error, Reason}
 %%
 %% @doc Retrieve a file chunk from a specified node. 
 %% Used by {@link erlfs_client}.
@@ -66,7 +64,7 @@ get_chunk(Node, ChunkID) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-test_store_chunk() ->
+store_chunk_test() ->
     Data = <<"Hello world!">>,
     FileMeta = #file_meta{id="test123", name="test.txt", type="text/plain"},
     ChunkMeta = #chunk_meta{file_meta=FileMeta},
@@ -75,7 +73,7 @@ test_store_chunk() ->
     io:format("Storing result: ~p~n", [Result]),
     storing_chunk = Result,
     receive X ->
-	    io:format("Receieved message: ~p~n", [x])
+	    io:format("Receieved message: ~p~n", [X])
     end.
 
 

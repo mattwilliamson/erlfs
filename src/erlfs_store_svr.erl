@@ -69,15 +69,16 @@ init([]) ->
 %%--------------------------------------------------------------------
 handle_call({store_chunk, Chunk}, From, State) 
   when is_record(Chunk, chunk) ->
-    io:format("Storing chunk..."),
+    io:format("Storing chunk...~n"),
     Reply = storing_chunk,
-    %% Reply immediately so other clients can perform calls.
+    %% Reply immediately because call is blocking.
     gen_server:reply(From, Reply),
-    supervisor:start_child(erlfs_store_worker_sup, {store_chunk, Chunk}),
+    io:format("~p starting worker...~n", [?MODULE]),
+    {ok, PID} = supervisor:start_child(erlfs_store_worker_sup, {store_chunk, Chunk}),
     {reply, Reply, State};
 
 handle_call({get_chunk, Ref, ChunkMeta}, From, State) ->
-    io:format("Retrieving chunk"),
+    io:format("Retrieving chunk...~n"),
     Reply = storing_chunk,
     gen_server:reply(From, Reply),
     WorkerArg = {get_chunk, {From, Ref, ChunkMeta}},
@@ -86,7 +87,7 @@ handle_call({get_chunk, Ref, ChunkMeta}, From, State) ->
 
 handle_call(_Request, _From, State) ->
     % @todo Add error logging here
-    io:format("Unknown call."),
+    io:format("Unknown call.~n"),
     Reply = ok,
     {reply, Reply, State}.
 

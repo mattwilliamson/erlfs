@@ -4,7 +4,7 @@
 %%% @author Matt Williamson <mwilliamson@dawsdesign.com>
 %%%
 %%% @doc This is a simple_one_for_one supervisor where worker
-%%% processes are spawned to save and replicate file chunks.
+%%% processes are spawned to save file chunks.
 %%%
 %%% @end
 %%%-------------------------------------------------------------------
@@ -31,6 +31,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
+    io:format("Started: ~p~n", [?MODULE]),
     supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 %%====================================================================
@@ -48,12 +49,11 @@ start_link() ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-init(Chunk) ->
-    {ok, {{simple_one_for_one, 0, 1},
-          [{erlfs_store_worker_fsm, 
-	    {erlfs_store_worker_fsm, start_link, Chunk},
-            temporary, brutal_kill, worker, 
-	    [erlfs_store_worker_fsm]}]}}.
+init(Args) ->
+    WorkerSpec = {erlfs_store_worker_fsm, {erlfs_store_worker_fsm, 
+					   start_link, []},
+		  temporary, 2000, worker, [erlfs_store_worker_fsm]},
+    {ok,{{one_for_all, 0, 1}, [WorkerSpec]}}.
 
 %%====================================================================
 %% Internal functions

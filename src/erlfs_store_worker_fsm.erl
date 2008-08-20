@@ -43,8 +43,9 @@
 %%
 %% @end
 %%--------------------------------------------------------------------
-start_link(FileChunk) ->
-    gen_fsm:start_link(?MODULE, FileChunk, []).
+start_link(StartArg) ->
+    io:format("~p:start_link...", ?MODULE),
+    gen_fsm:start_link(?MODULE, StartArg, []).
 
 %%====================================================================
 %% gen_fsm callbacks
@@ -60,7 +61,8 @@ start_link(FileChunk) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-init(StartArg) ->
+init([StartArg]) ->
+    io:format("~p started.~n", [?MODULE]),
     case StartArg of
 	{store_chunk, Chunk} ->
 	    {ok, storing_chunk, Chunk};
