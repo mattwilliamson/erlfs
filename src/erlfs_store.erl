@@ -71,7 +71,12 @@ test_store_chunk() ->
     FileMeta = #file_meta{id="test123", name="test.txt", type="text/plain"},
     ChunkMeta = #chunk_meta{file_meta=FileMeta},
     Chunk = #chunk{chunk_meta=ChunkMeta, data=Data},
-    storing_chunk = store_chunk(Chunk, node()).
+    Result = store_chunk(node(), Chunk),
+    io:format("Storing result: ~p~n", [Result]),
+    storing_chunk = Result,
+    receive X ->
+	    io:format("Receieved message: ~p~n", [x])
+    end.
 
 
 %%====================================================================

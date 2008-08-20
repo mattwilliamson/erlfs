@@ -11,7 +11,8 @@
 -module(erlfs_store_svr).
 
 %% @headerfile "../include/erlfs.hrl"
--include("erlfs.hrl").
+-include_lib("erlfs.hrl").
+-include_lib("eunit/include/eunit.hrl").
 
 -behaviour(gen_server).
 
@@ -53,6 +54,7 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
+    erlang:process_flag(trap_exit, true),
     {ok, #state{}}.
 
 %%--------------------------------------------------------------------
@@ -67,21 +69,24 @@ init([]) ->
 %%--------------------------------------------------------------------
 handle_call({store_chunk, Chunk}, From, State) 
   when is_record(Chunk, chunk) ->
-    Reply = {reply, storing_chunk,State},
+    io:format("Storing chunk..."),
+    Reply = storing_chunk,
     %% Reply immediately so other clients can perform calls.
     gen_server:reply(From, Reply),
     supervisor:start_child(erlfs_store_worker_sup, {store_chunk, Chunk}),
-    Reply;
+    {reply, Reply, State};
 
 handle_call({get_chunk, Ref, ChunkMeta}, From, State) ->
-    Reply = {reply, storing_chunk, State},
+    io:format("Retrieving chunk"),
+    Reply = storing_chunk,
     gen_server:reply(From, Reply),
     WorkerArg = {get_chunk, {From, Ref, ChunkMeta}},
     supervisor:start_child(erlfs_store_worker_sup, WorkerArg),
-    State;
+    {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
     % @todo Add error logging here
+    io:format("Unknown call."),
     Reply = ok,
     {reply, Reply, State}.
 
