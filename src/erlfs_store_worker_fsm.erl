@@ -43,9 +43,9 @@
 %%
 %% @end
 %%--------------------------------------------------------------------
-start_link(StartArg) ->
-    io:format("~p:start_link...", ?MODULE),
-    gen_fsm:start_link(?MODULE, StartArg, []).
+start_link(StartArgs) ->
+    io:format("~p:start_link...", [?MODULE]),
+    gen_fsm:start_link(?MODULE, StartArgs, []).
 
 %%====================================================================
 %% gen_fsm callbacks
@@ -61,14 +61,19 @@ start_link(StartArg) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-init([StartArg]) ->
-    io:format("~p started.~n", [?MODULE]),
-    case StartArg of
+init(StartArgs) ->
+    InitialState = case StartArgs of
 	{store_chunk, Chunk} ->
-	    {ok, storing_chunk, Chunk};
+	    io:format("FSM Storing chunk...~n"),
+	    {ok, storing_chunk, [Chunk]};
 	{get_chunk, Args} ->
-	    {ok, getting_chunk, Args}
-    end.
+	    {ok, getting_chunk, Args};
+	Else ->
+	    %% @todo Add error logging here.
+	    io:format("Bad arg for FSM: ~p~n", [StartArgs])
+    end,
+    io:format("FSM Initial State: ~p~n", [InitialState]),
+    InitialState.
 
 %%--------------------------------------------------------------------
 %% States to store a chunk
@@ -82,11 +87,14 @@ init([StartArg]) ->
 %% 
 %% @end
 %%--------------------------------------------------------------------
-storing_chunk(_Event, Chunk) ->
+storing_chunk(_Event, [Chunk]) ->
+    io:format("STATE: storing_chunk~n"),
     case erlfs_store_lib:store_chunk() of
 	ok ->
 	    {next_state, notifying_tracker, Chunk};
 	{error, Reason} ->
+	    %% @todo Add error logging here.
+	    io:format("FSM Stopped: ~p~n", [Reason]),
 	    {stop, {file, Reason}, Chunk#chunk.chunk_meta}
     end.
 
@@ -102,6 +110,7 @@ storing_chunk(_Event, Chunk) ->
 %% @end
 %%--------------------------------------------------------------------
 notifying_tracker(_Event, ChunkMeta) ->
+    io:format("STATE: notifying_tracker~n"),
     %% Tell a tracker that we have stored the chunk
     Trackers = erlfs:whereis_gen_server(erlfs_tracker_svr),
     case notify_tracker(Trackers, ChunkMeta) of
@@ -146,6 +155,7 @@ getting_chunk(_Event, {From, Ref, ChunkMeta}) ->
 %% @end
 %%--------------------------------------------------------------------
 done(_Event, State) ->
+    io:format("STATE: done"),
     {stop, done, State}.
 
 % @todo FINISH DOCS

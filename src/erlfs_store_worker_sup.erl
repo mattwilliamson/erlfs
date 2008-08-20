@@ -49,11 +49,11 @@ start_link() ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-init(Args) ->
+init(_Args) ->
     WorkerSpec = {erlfs_store_worker_fsm, {erlfs_store_worker_fsm, 
 					   start_link, []},
 		  temporary, 2000, worker, [erlfs_store_worker_fsm]},
-    {ok,{{one_for_all, 0, 1}, [WorkerSpec]}}.
+    {ok,{{simple_one_for_one, 0, 1}, [WorkerSpec]}}.
 
 %%====================================================================
 %% Internal functions

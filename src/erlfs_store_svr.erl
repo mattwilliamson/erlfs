@@ -74,7 +74,7 @@ handle_call({store_chunk, Chunk}, From, State)
     %% Reply immediately because call is blocking.
     gen_server:reply(From, Reply),
     io:format("~p starting worker...~n", [?MODULE]),
-    {ok, PID} = supervisor:start_child(erlfs_store_worker_sup, {store_chunk, Chunk}),
+    {ok, _Pid} = supervisor:start_child(erlfs_store_worker_sup, [{store_chunk, Chunk}]),
     {reply, Reply, State};
 
 handle_call({get_chunk, Ref, ChunkMeta}, From, State) ->
