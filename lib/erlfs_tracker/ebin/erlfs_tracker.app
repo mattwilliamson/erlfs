@@ -1,6 +1,6 @@
 {application, erlfs_tracker, [{mod, {erlfs_tracker, []}},
   	      		     {description, "Erlang distributed file storage system tracker."},
-  	      		     {vsn, "alpha"},
+  	      		     {vsn, "1"},
 	      		     {modules, [erlfs_tracker, 
 			     	        erlfs_tracker_sup, 
 			     	       	erlfs_tracker_svr, 

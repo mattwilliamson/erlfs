@@ -1,6 +1,6 @@
 {application, erlfs_store, [{mod, {erlfs_store, []}},
 	      {description, "Erlang distributed file storage system storage node application."},
-	      {vsn, "alpha"},
+	      {vsn, "1"},
 	      {registered, [erlfs_store_svr]},
 	      {applications, [kernel, stdlib, sasl, crypto]},
 	      {modules, [erlfs_store, erlfs_store_sup,
