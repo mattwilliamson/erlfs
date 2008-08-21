@@ -9,4 +9,5 @@
 	   
 	   %% Required by apps
 	   {mnesia, "4.3.5"},
-	   {crypto, "1.5.1.1"}]}.
+	   {crypto, "1.5.1.1"},
+	   {sasl, "2.1.5.1"}]}.

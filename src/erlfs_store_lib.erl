@@ -13,7 +13,7 @@
 -include("erlfs.hrl").
 
 %% API
--export([store_file_chunk/1, get_chunk/1]).
+-export([store_chunk/1, get_chunk/1]).
 
 %%====================================================================
 %% API
@@ -32,19 +32,21 @@
 %%
 %% @end
 %%--------------------------------------------------------------------
-store_file_chunk(Chunk) ->
+store_chunk(Chunk) ->
     ChunkMeta = Chunk#chunk.chunk_meta,
     Data = Chunk#chunk.data,
-    FinalPath = chunk_to_path(ChunkMeta),
+    FileMeta = ChunkMeta#chunk_meta.file_meta,
+    ChunkID = {FileMeta#file_meta.id, ChunkMeta#chunk_meta.number},
+    FinalPath = chunk_id_to_path(ChunkID),
     %% Create any folders necessary
-    ok = file_lib:ensure_dir(FinalPath),
+    ok = filelib:ensure_dir(FinalPath),
     file:write_file(FinalPath, Data).
 
 
-get_chunk(ChunkMeta) ->
-    FinalPath = chunk_to_path(ChunkMeta),
+get_chunk(ChunkID) ->
+    FinalPath = chunk_id_to_path(ChunkID),
     {ok, Data} = file:read_file(FinalPath),
-    #chunk{chunk_meta=ChunkMeta, data=Data}.
+    Data.
 
 
 %%====================================================================
@@ -65,9 +67,11 @@ get_chunk(ChunkMeta) ->
 hash_to_path(HashBinary) when is_binary(HashBinary) ->
     hash_to_path(binary_to_list(HashBinary), []);
 hash_to_path(HashString) when is_list(HashString) ->
-    hash_to_path(HashString).
+    hash_to_path(HashString, []).
+hash_to_path([], Path) ->
+    Path;
 hash_to_path([A,B|Rest], NewList) ->
-    hash_to_path(Rest, [A ++ B ++ "/" | NewList]).
+    hash_to_path(Rest, [A, B, "/"] ++ NewList).
 
 %%--------------------------------------------------------------------
 %% @spec chunk_to_path(ChunkMeta) -> Path
@@ -78,7 +82,7 @@ hash_to_path([A,B|Rest], NewList) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-chunk_to_path(#chunk_meta{file_meta=#file_meta{id=ID}, 
-			  number=Number}) ->
-    {ok, DataDir} = application:get_env(data_dir),
-    filename:join([DataDir, hash_to_path(ID), Number]).
+chunk_id_to_path({FileID, ChunkNumber}) ->
+    {ok, DataDir} = application:get_env(erlfs_store, data_dir),
+    NumberString = integer_to_list(ChunkNumber),
+    filename:join([DataDir, hash_to_path(FileID), NumberString]).

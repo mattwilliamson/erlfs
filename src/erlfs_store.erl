@@ -32,7 +32,14 @@
 %% @end
 %%--------------------------------------------------------------------
 store_chunk(Node, Chunk) ->
-    gen_server:call({?SERVER, Node}, {store_chunk, Chunk}).
+    storing_chunk = gen_server:call({?SERVER, Node}, {store_chunk, Chunk}),
+    Timeout = get_timeout(),
+    Status = receive 
+		 {store_status, ok} -> ok;
+		 Error -> Error
+	     after Timeout -> {error, timeout}
+	     end,
+    Status.
 
 
 %%--------------------------------------------------------------------
@@ -47,8 +54,16 @@ store_chunk(Node, Chunk) ->
 %% @end
 %%--------------------------------------------------------------------
 get_chunk(Node, ChunkID) ->
-    Ref = make_ref(),
-    gen_server:call({?SERVER, Node}, {get_chunk, Ref, ChunkID}).
+    %% @todo Change this to pass around chunk records
+    gen_server:call({?SERVER, Node}, {get_chunk, ChunkID}),
+    Timeout = get_timeout(),
+    Status = receive 
+		 {get_chunk, ok, ChunkData} -> 
+		     {ok, ChunkData};
+		 Error -> Error
+	     after Timeout -> {error, timeout}
+	     end,
+    Status.
 
 %%====================================================================
 %% Tests
@@ -56,25 +71,35 @@ get_chunk(Node, ChunkID) ->
 %%--------------------------------------------------------------------
 %% @private
 %%
-%% @spec store_chunk_test() -> ok | {error, Reason}
+%% @spec store_chunk_test() -> ok
 %%
-%% @doc Retrieve a file chunk from a specified node. 
-%% Used by {@link erlfs_client}.
-%% The caller must try a different node if the specified node is down.
+%% @doc Test storing a chunk
 %%
 %% @end
 %%--------------------------------------------------------------------
 store_chunk_test() ->
     Data = <<"Hello world!">>,
-    FileMeta = #file_meta{id="test123", name="test.txt", type="text/plain"},
+    FileID = "5eb63bbbe01eeed093cb22bb8f5acdc3",
+    FileMeta = #file_meta{id=FileID, name="test.txt", type="text/plain"},
     ChunkMeta = #chunk_meta{file_meta=FileMeta},
     Chunk = #chunk{chunk_meta=ChunkMeta, data=Data},
-    Result = store_chunk(node(), Chunk),
-    io:format("Storing result: ~p~n", [Result]),
-    storing_chunk = Result,
-    receive X ->
-	    io:format("Receieved message: ~p~n", [X])
-    end.
+    ok = store_chunk(node(), Chunk).
+
+%%--------------------------------------------------------------------
+%% @private
+%%
+%% @spec get_chunk_test() -> ok
+%%
+%% @doc Test retrieving a chunk.
+%%
+%% @end
+%%--------------------------------------------------------------------
+get_chunk_test() ->
+    FileID = "5eb63bbbe01eeed093cb22bb8f5acdc3",
+    ChunkNumber = 0,
+    ChunkID = {FileID, ChunkNumber},
+    {ok, ChunkData} = get_chunk(node(), ChunkID),
+    <<"Hello world!">> = ChunkData.
 
 
 %%====================================================================
@@ -121,3 +146,10 @@ stop(_State) ->
 %%====================================================================
 %% Internal functions
 %%====================================================================
+get_timeout() ->
+    case application:get_env(erlfs_store, transfer_timeout) of
+	{ok, Value} -> 
+	    Value;
+	undefined ->
+	    15000
+    end.

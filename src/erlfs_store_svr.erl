@@ -69,25 +69,16 @@ init([]) ->
 %%--------------------------------------------------------------------
 handle_call({store_chunk, Chunk}, From, State) 
   when is_record(Chunk, chunk) ->
-    io:format("Storing chunk...~n"),
-    Reply = storing_chunk,
-    %% Reply immediately because call is blocking.
-    gen_server:reply(From, Reply),
-    io:format("~p starting worker...~n", [?MODULE]),
-    {ok, _Pid} = supervisor:start_child(erlfs_store_worker_sup, [{store_chunk, Chunk}]),
-    {reply, Reply, State};
+    spawn_link(fun() -> store_chunk(From, Chunk) end),
+    {reply, storing_chunk, State};
 
-handle_call({get_chunk, Ref, ChunkMeta}, From, State) ->
-    io:format("Retrieving chunk...~n"),
-    Reply = storing_chunk,
-    gen_server:reply(From, Reply),
-    WorkerArg = {get_chunk, {From, Ref, ChunkMeta}},
-    supervisor:start_child(erlfs_store_worker_sup, WorkerArg),
-    {reply, Reply, State};
+handle_call({get_chunk, ChunkID}, From, State) ->
+    spawn_link(fun() -> get_chunk(From, ChunkID) end),
+    {reply, getting_chunk, State};
 
-handle_call(_Request, _From, State) ->
+handle_call(Request, _From, State) ->
     % @todo Add error logging here
-    io:format("Unknown call.~n"),
+    io:format("Unknown call: ~p~n", [Request]),
     Reply = ok,
     {reply, Reply, State}.
 
@@ -137,3 +128,27 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 %%% Internal functions
 %%--------------------------------------------------------------------
+store_chunk({From, _Ref}, Chunk) ->
+    ok = erlfs_store_lib:store_chunk(Chunk),
+    %Trackers = erlfs:whereis_gen_server(erlfs_tracker_svr),
+    %ok = notify_tracker(Trackers, Chunk#chunk.chunk_meta),
+    Message = {store_status, ok},
+    From ! Message.
+
+get_chunk({From, _Ref}, ChunkID) ->
+    Chunk = erlfs_store_lib:get_chunk(ChunkID),
+    Message = {get_chunk, ok, Chunk},
+    From ! Message.
+
+notify_tracker([Node|Trackers], ChunkMeta) ->
+    %% Notify a tracker that this node has stored a chunk
+    %% Try until we get a good tracker or we run out
+    Message = {stored_chunk, ChunkMeta, node()},
+    case gen_server:call({erlfs_tracker_svr, Node}, Message) of
+	{ok, stored_chunk} ->
+	    ok;
+	_ ->
+	    notify_tracker(Trackers, ChunkMeta)
+    end;
+notify_tracker([], _FileChunk) ->
+    {error, notrackers}.

@@ -61,19 +61,17 @@ start_link(StartArgs) ->
 %%
 %% @end
 %%--------------------------------------------------------------------
-init(StartArgs) ->
-    InitialState = case StartArgs of
+init(StartMsg) ->
+    case StartMsg of
 	{store_chunk, Chunk} ->
 	    io:format("FSM Storing chunk...~n"),
-	    {ok, storing_chunk, [Chunk]};
+	    {ok, storing_chunk, Chunk};
 	{get_chunk, Args} ->
 	    {ok, getting_chunk, Args};
 	Else ->
 	    %% @todo Add error logging here.
-	    io:format("Bad arg for FSM: ~p~n", [StartArgs])
-    end,
-    io:format("FSM Initial State: ~p~n", [InitialState]),
-    InitialState.
+	    io:format("Bad arg for FSM: ~p~n", [Else])
+    end.
 
 %%--------------------------------------------------------------------
 %% States to store a chunk
@@ -87,9 +85,10 @@ init(StartArgs) ->
 %% 
 %% @end
 %%--------------------------------------------------------------------
-storing_chunk(_Event, [Chunk]) ->
+storing_chunk(_Event, Chunk) ->
     io:format("STATE: storing_chunk~n"),
-    case erlfs_store_lib:store_chunk() of
+    gen_fsm:send_event(self(), continue),
+    case erlfs_store_lib:store_chunk(Chunk) of
 	ok ->
 	    {next_state, notifying_tracker, Chunk};
 	{error, Reason} ->
@@ -110,6 +109,7 @@ storing_chunk(_Event, [Chunk]) ->
 %% @end
 %%--------------------------------------------------------------------
 notifying_tracker(_Event, ChunkMeta) ->
+    gen_fsm:send_event(self(), continue),
     io:format("STATE: notifying_tracker~n"),
     %% Tell a tracker that we have stored the chunk
     Trackers = erlfs:whereis_gen_server(erlfs_tracker_svr),
@@ -133,6 +133,7 @@ notifying_tracker(_Event, ChunkMeta) ->
 %% @end
 %%--------------------------------------------------------------------
 getting_chunk(_Event, {From, Ref, ChunkMeta}) ->
+    gen_fsm:send_event(self(), continue),
     case erlfs_store_lib:get_chunk(ChunkMeta) of
 	{ok, Chunk} ->
 	    From ! {get_chunk, Ref, Chunk},

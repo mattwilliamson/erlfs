@@ -52,10 +52,7 @@ start_link(StartArgs) ->
 init([]) ->
     ErlFSStore = {erlfs_store, {erlfs_store_svr, start_link, []},
 	      permanent, 2000, worker, [erlfs_store_svr]},
-    ErlFSWorkers = {erlfs_store_worker_sup, {erlfs_store_worker_sup, 
-					     start_link, []},
-	      permanent, 2000, supervisor, [erlfs_store_worker_sup]},
-    {ok,{{one_for_all, 0, 1}, [ErlFSStore, ErlFSWorkers]}}.
+    {ok,{{one_for_all, 0, 1}, [ErlFSStore]}}.
 
 %%====================================================================
 %% Internal functions
