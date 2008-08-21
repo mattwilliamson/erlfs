@@ -6,4 +6,4 @@
 			     	       	erlfs_tracker_svr, 
 					erlfs_tracker_lib]},
 			     {registered, [erlfs_tracker_svr]},
-	      	             {applications, [kernel, stdlib, mnesia]}]}.
+	      	             {applications, [kernel, stdlib, sasl, mnesia]}]}.
