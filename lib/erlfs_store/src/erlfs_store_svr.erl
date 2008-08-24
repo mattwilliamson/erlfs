@@ -55,6 +55,8 @@ start_link() ->
 %%--------------------------------------------------------------------
 init([]) ->
     erlang:process_flag(trap_exit, true),
+    pg2:create(?SERVER),
+    pg2:join(?SERVER, self()),
     {ok, #state{}}.
 
 %%--------------------------------------------------------------------
@@ -115,6 +117,7 @@ handle_info(_Info, State) ->
 %% @end
 %%--------------------------------------------------------------------
 terminate(_Reason, _State) ->
+    pg2:leave(?SERVER, self()),
     ok.
 
 %%--------------------------------------------------------------------
@@ -130,7 +133,7 @@ code_change(_OldVsn, State, _Extra) ->
 %%--------------------------------------------------------------------
 store_chunk({From, _Ref}, Chunk) ->
     ok = erlfs_store_lib:store_chunk(Chunk),
-    %Trackers = erlfs:whereis_gen_server(erlfs_tracker_svr),
+    %Trackers = pg2:get_members(erlfs_tracker_svr),
     %ok = notify_tracker(Trackers, Chunk#chunk.chunk_meta),
     Message = {store_status, ok},
     From ! Message.

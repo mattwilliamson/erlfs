@@ -7,7 +7,7 @@
 -module(erlfs_store).
 
 -include("erlfs.hrl").
--include_lib("eunit/include/eunit.hrl").
+-include_lib("eunit.hrl").
 
 -behaviour(application).
 
