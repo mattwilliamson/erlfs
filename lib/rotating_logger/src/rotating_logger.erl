@@ -59,10 +59,11 @@ add_handler() ->
 %% gen_event callbacks
 %%====================================================================
 %%--------------------------------------------------------------------
-%% @spec init(Proplist) -> {ok, State}
-%% @type PropList = [Property]
-%% @type Property = {Name, Value}
-%% @doc Whenever a new event handler is added to an event manager,
+%% @spec init(PropList) -> {ok, State}
+%%      PropList = [Property]
+%%      Property = {Name, Value}
+%% @doc
+%% Whenever a new event handler is added to an event manager,
 %% this function is called to initialize the event handler.
 %% 
 %% == Properties ==
@@ -79,18 +80,19 @@ add_handler() ->
 %%  <td>Name of the log file, e.g. Name.0, Name.1, Name.N</td>
 %%  <td>"log"</td>
 %% </tr>
+%% <tr>
 %%  <td>dir</td>
 %%  <td>string()</td>
 %%  <td>Directory where the files are stored.</td>
 %%  <td>"."</td>
 %% </tr>
-%% </tr>
+%% <tr>
 %%  <td>max_files</td>
 %%  <td>integer()</td>
 %%  <td>Maximum number of log files before they are recycled.</td>
 %%  <td>5</td>
 %% </tr>
-%% </tr>
+%% <tr>
 %%  <td>max_bytes</td>
 %%  <td>integer()</td>
 %%  <td>Maximum number of bytes written before the logger moves to the next file.</td>
@@ -251,7 +253,7 @@ write_log_file(State, {Class, Event}) ->
 	    write_log_file(next_log_file(State), {Class, Event})
     end.
 
-%% @spec next_log_file(State) -> New State
+%% @spec next_log_file(State) -> NewState
 %% @doc Rotates log files, meaning it will move to Name.N + 1 where N is the current 
 %% file number, truncating the next file. If N == the maximum number of file, 
 %% it will change N to 0.

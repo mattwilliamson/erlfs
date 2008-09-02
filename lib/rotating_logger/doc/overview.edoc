@@ -1,0 +1,46 @@
+@author Matt Williamson <mwilliamson@dawsdesign.com>
+@copyright 2008 Matt Williamson
+@version 0.1.0.0
+@title Rotating Logger Application
+@doc This module allows a developer to include plaintext logging with file rotation in their erlang program. This makes it easier to use third party tools such as splunk or sitescope to parse log files and readable over NFS using a text editor and other such instances where binary formatted log files are not suitable.
+
+== Usage ==
+The [rotating_logger] module should be registered via: 
+`gen_event:add_handler(error_logger, rotating_logger, Args)'
+
+(see [rotating_logger:init/1] for Args) and then an event should be logged like so:
+
+`gen_event:notify(event_logger, {Class, Message})'
+
+Although it is not limited to just the event_logger. Class can be any term, but the atoms `error', `warning', `info' are recommended. Message should be a string. When Class is not provided, the atom `noclass' is used. Here's an example:
+
+`gen_event:notify(event_logger, {warning, "User did not provide email"})'
+
+== Rotation ==
+When a file size has reached the `max_byte' property as set when calling gen_event:add_handler/3, a file is considered full. The logger will close the file and move to the next available one. If the current file number is equal to the `max_files' property, it will reset the current file to 0 otherwise it will increment it by 1. When the module is registered, it creates a file call Name.index where Name is the name property provided when registering the handler and Name.N is the current log file. Name.index is written to every time a file is rotated, to keep track of which file it was on so that it can resume from the previous session after the module has been unregistered.
+
+== Example ==
+```
+Eshell V5.6.3  (abort with ^G)
+1> gen_event:add_handler(error_logger, rotating_logger, [{name, "my_log"}, 
+														 {dir, "/var/logs/myapp/"}, 
+														 {max_files, 5}, 
+														 {max_bytes, 10*1024*1024}]).   
+Starting rotating_logger...
+Reading index file...
+Opening log file...
+Writing to log file... (55+0b/10485760)
+ok
+2> gen_event:notify(error_logger, {error, "Disk is full!"}).    
+Writing to log file... (41+55b/10485760)
+ok
+3> 
+User switch command
+ --> q
+$ cat /var/logs/myapp/my_log.0 
+2008-08-30T20:22:57Z	info	Started Logging in GMT time.
+2008-08-30T20:24:13Z	error	Disk is full!
+$
+'''
+
+@reference [http://dawsdesign.com]

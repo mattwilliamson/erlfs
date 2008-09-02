@@ -19,7 +19,7 @@
 %% API
 %%====================================================================
 %%-------------------------------------------------------------------
-%% @spec store_file_chunk(Chunk) -> ok | {error, Reason}
+%% @spec store_chunk(Chunk) -> ok | {error, Reason}
 %%
 %% @doc Store a piece of a file on the filesystem.
 %%
@@ -74,7 +74,7 @@ hash_to_path([A,B|Rest], NewList) ->
     hash_to_path(Rest, [A, B, "/"] ++ NewList).
 
 %%--------------------------------------------------------------------
-%% @spec chunk_to_path(ChunkMeta) -> Path
+%% @spec chunk_id_to_path(ChunkMeta) -> Path
 %%     Path = string()
 %%
 %% @doc Determine the filesystem location of a file chunk. Returns 
