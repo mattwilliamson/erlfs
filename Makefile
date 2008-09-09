@@ -19,3 +19,6 @@ release:
 shell:
 	${SINAN} shell
 	
+dist:
+	${SINAN} dist
+	
