@@ -10,9 +10,7 @@
 %%%-------------------------------------------------------------------
 -module(erlfs_store_svr).
 
-%% @headerfile "../include/erlfs.hrl"
 -include_lib("erlfs.hrl").
--include_lib("eunit/include/eunit.hrl").
 
 -behaviour(gen_server).
 

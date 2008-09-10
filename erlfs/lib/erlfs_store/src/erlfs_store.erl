@@ -1,18 +1,11 @@
+%%%===================================================================
 %%% @author Matt Williamson <mwilliamson@dawsdesign.com>
-%%% @doc This application is used to store and retrieve file chunks in 
-%%% an ErlFS cluster. When a client wants to retrieve a chunk of a
-%%% file, it calls chunk_get/2. If it wants to store a chunk, it
-%%% calls chunk_store/2.
-%%% @headerfile "../include/erlfs.hrl"
+%%%
+%%% @doc Module Provides an API to the erlfs_store application.
+%%%===================================================================
 -module(erlfs_store).
 
 -include("erlfs.hrl").
--include_lib("eunit.hrl").
-
--behaviour(application).
-
-%% Application callbacks
--export([start/2, stop/1]).
 
 %% API
 -export([store_chunk/2, get_chunk/2]).
@@ -66,84 +59,6 @@ get_chunk(Node, ChunkID) ->
     Status.
 
 %%====================================================================
-%% Tests
-%%====================================================================
-%%--------------------------------------------------------------------
-%% @private
-%%
-%% @spec store_chunk_test() -> ok
-%%
-%% @doc Test storing a chunk
-%%
-%% @end
-%%--------------------------------------------------------------------
-store_chunk_test() ->
-    Data = <<"Hello world!">>,
-    FileID = "5eb63bbbe01eeed093cb22bb8f5acdc3",
-    FileMeta = #file_meta{id=FileID, name="test.txt", type="text/plain"},
-    ChunkMeta = #chunk_meta{file_meta=FileMeta},
-    Chunk = #chunk{chunk_meta=ChunkMeta, data=Data},
-    ok = store_chunk(node(), Chunk).
-
-%%--------------------------------------------------------------------
-%% @private
-%%
-%% @spec get_chunk_test() -> ok
-%%
-%% @doc Test retrieving a chunk.
-%%
-%% @end
-%%--------------------------------------------------------------------
-get_chunk_test() ->
-    FileID = "5eb63bbbe01eeed093cb22bb8f5acdc3",
-    ChunkNumber = 0,
-    ChunkID = {FileID, ChunkNumber},
-    {ok, ChunkData} = get_chunk(node(), ChunkID),
-    <<"Hello world!">> = ChunkData.
-
-
-%%====================================================================
-%% Application callbacks
-%%====================================================================
-%%--------------------------------------------------------------------
-%% @private
-%%
-%% @spec start(Type, StartArgs) -> {ok, Pid} |
-%%                                     {ok, Pid, State} |
-%%                                     {error, Reason}
-%%     Pid = pid()
-%%
-%% @doc This function is called whenever an application 
-%% is started using application:start/1,2, and should start the processes
-%% of the application. If the application is structured according to the
-%% OTP design principles as a supervision tree, this means starting the
-%% top supervisor of the tree.
-%%
-%% @end
-%%--------------------------------------------------------------------
-start(_Type, StartArgs) ->
-    case erlfs_store_sup:start_link(StartArgs) of
-	{ok, Pid} -> 
-	    {ok, Pid};
-	Error ->
-	    Error
-    end.
-
-%%--------------------------------------------------------------------
-%% @private
-%%
-%% @spec stop(State) -> void()
-%%
-%% @doc This function is called whenever an application
-%% has stopped. It is intended to be the opposite of Module:start/2 and
-%% should do any necessary cleaning up. The return value is ignored. 
-%%
-%% @end
-%%--------------------------------------------------------------------
-stop(_State) ->
-    ok.
-
-%%====================================================================
 %% Internal functions
 %%====================================================================
 get_timeout() ->
@@ -153,3 +68,72 @@ get_timeout() ->
 	undefined ->
 	    15000
     end.
+
+%%-------------------------------------------------------------------
+%% @spec store_chunk(Chunk) -> ok | {error, Reason}
+%%
+%% @doc Store a piece of a file on the filesystem.
+%%
+%% The path where it is stored is a) the folder path hashed and b)
+%% the file path + file name hashed. The hashes are split into two
+%% byte chunks, e.g. /ab/cd/ef/12/... This prevents too many files or
+%% directories in on directory, as is limited by certain filesystems.
+%% The chunk will be stored under the filename n, where n is the chunk
+%% number.
+%%
+%% @end
+%%--------------------------------------------------------------------
+store_chunk(Chunk) ->
+    ChunkMeta = Chunk#chunk.chunk_meta,
+    Data = Chunk#chunk.data,
+    FileMeta = ChunkMeta#chunk_meta.file_meta,
+    ChunkID = {FileMeta#file_meta.id, ChunkMeta#chunk_meta.number},
+    FinalPath = chunk_id_to_path(ChunkID),
+    %% Create any folders necessary
+    ok = filelib:ensure_dir(FinalPath),
+    file:write_file(FinalPath, Data).
+
+
+get_chunk(ChunkID) ->
+    FinalPath = chunk_id_to_path(ChunkID),
+    {ok, Data} = file:read_file(FinalPath),
+    Data.
+
+
+%%====================================================================
+%% Internal Functions
+%%====================================================================
+%%--------------------------------------------------------------------
+%% @spec hash_to_path(HashBinary) -> HashPath
+%%     HashBinary = binary()
+%%     HashPath = string()
+%%
+%% @doc Converts hash e.g. abcdef... to directory path e.g. 
+%% /ab/cd/ef/12/34/56....
+%% This is the method to spread files across many directories to avoid
+%% OS errors due to either path too long or too many files/directories.
+%%
+%% @end
+%%--------------------------------------------------------------------
+hash_to_path(HashBinary) when is_binary(HashBinary) ->
+    hash_to_path(binary_to_list(HashBinary), []);
+hash_to_path(HashString) when is_list(HashString) ->
+    hash_to_path(HashString, []).
+hash_to_path([], Path) ->
+    Path;
+hash_to_path([A,B|Rest], NewList) ->
+    hash_to_path(Rest, [A, B, "/"] ++ NewList).
+
+%%--------------------------------------------------------------------
+%% @spec chunk_id_to_path(ChunkMeta) -> Path
+%%     Path = string()
+%%
+%% @doc Determine the filesystem location of a file chunk. Returns 
+%% something like /ab/cd/ef/12/34/56/78/90/AB/.../0
+%%
+%% @end
+%%--------------------------------------------------------------------
+chunk_id_to_path({FileID, ChunkNumber}) ->
+    {ok, DataDir} = application:get_env(erlfs_store, data_dir),
+    NumberString = integer_to_list(ChunkNumber),
+    filename:join([DataDir, hash_to_path(FileID), NumberString]).
