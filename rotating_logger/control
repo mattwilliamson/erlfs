@@ -1,5 +1,0 @@
-{control,"rotating_logger",
-         [{package_owner,"Matt Williamson"},
-          {package_owner_email,"mwilliamson@dawsdesign.com"},
-          {categories,["tool","misc"]},
-          {description,"An gen_event module which alows you to implement rotating plain-text logs in an OTP friendly way. Great for use with Splunk!"}]}.
